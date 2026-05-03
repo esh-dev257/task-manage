@@ -1,23 +1,19 @@
-import { Calendar, User, AlertCircle } from 'lucide-react';
+import { Calendar, User, AlertCircle, Trash2 } from 'lucide-react';
 import type { Task } from '../types';
 
-const priorityColors = {
-  high: 'bg-red-100 text-red-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-green-100 text-green-700',
+const priorityStyles = {
+  high:   { background: 'rgba(239,68,68,0.15)',  color: '#fca5a5' },
+  medium: { background: 'rgba(251,191,36,0.15)', color: '#fde68a' },
+  low:    { background: 'rgba(52,211,153,0.15)', color: '#6ee7b7' },
 };
 
-const statusColors = {
-  'todo': 'bg-gray-100 text-gray-600',
-  'in-progress': 'bg-blue-100 text-blue-700',
-  'completed': 'bg-green-100 text-green-700',
+const statusStyles = {
+  'todo':        { background: 'rgba(139,92,246,0.15)', color: '#c4b5fd' },
+  'in-progress': { background: 'rgba(59,130,246,0.15)', color: '#93c5fd' },
+  'completed':   { background: 'rgba(52,211,153,0.15)', color: '#6ee7b7' },
 };
 
-const statusLabels = {
-  'todo': 'To Do',
-  'in-progress': 'In Progress',
-  'completed': 'Completed',
-};
+const statusLabels = { 'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed' };
 
 interface TaskCardProps {
   task: Task;
@@ -30,58 +26,57 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3 hover:shadow-md transition-shadow">
+    <div className="rounded-xl p-4 space-y-3 transition-all hover:-translate-y-0.5" style={{ background: 'rgba(30,10,60,0.8)', border: '1px solid rgba(139,92,246,0.2)', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-medium text-gray-900 text-sm leading-snug">{task.title}</h3>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${priorityColors[task.priority]}`}>
+        <h3 className="font-semibold text-white text-sm leading-snug">{task.title}</h3>
+        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0" style={priorityStyles[task.priority]}>
           {task.priority}
         </span>
       </div>
 
       {task.description && (
-        <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+        <p className="text-xs text-purple-400 line-clamp-2">{task.description}</p>
       )}
 
-      <div className="flex flex-wrap gap-2">
+      <div>
         {onStatusChange ? (
           <select
             value={task.status}
             onChange={e => onStatusChange(task._id, e.target.value as Task['status'])}
-            className={`text-xs px-2 py-0.5 rounded-full font-medium border-0 cursor-pointer ${statusColors[task.status]}`}
+            className="text-[11px] px-2.5 py-1 rounded-full font-semibold border-0 cursor-pointer outline-none"
+            style={statusStyles[task.status]}
           >
             <option value="todo">To Do</option>
             <option value="in-progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
         ) : (
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[task.status]}`}>
+          <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold" style={statusStyles[task.status]}>
             {statusLabels[task.status]}
           </span>
         )}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-purple-400 pt-1" style={{ borderTop: '1px solid rgba(139,92,246,0.1)' }}>
         <div className="flex items-center gap-1">
-          <User size={12} />
+          <User size={11} />
           <span>{task.assignedTo?.name ?? 'Unassigned'}</span>
         </div>
-        {task.dueDate && (
-          <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-500 font-medium' : ''}`}>
-            {isOverdue && <AlertCircle size={12} />}
-            <Calendar size={12} />
-            <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {task.dueDate && (
+            <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-400' : ''}`}>
+              {isOverdue && <AlertCircle size={11} />}
+              <Calendar size={11} />
+              <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+            </div>
+          )}
+          {isAdmin && onDelete && (
+            <button onClick={() => onDelete(task._id)} className="text-purple-600 hover:text-red-400 transition-colors">
+              <Trash2 size={12} />
+            </button>
+          )}
+        </div>
       </div>
-
-      {isAdmin && onDelete && (
-        <button
-          onClick={() => onDelete(task._id)}
-          className="text-xs text-red-500 hover:text-red-700 transition-colors"
-        >
-          Delete
-        </button>
-      )}
     </div>
   );
 }

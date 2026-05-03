@@ -1,32 +1,29 @@
 interface StatCardProps {
   label: string;
   value: number;
-  bg: string;
-  textColor: string;
+  gradient: string;
   icon: React.ReactNode;
   sub?: string;
 }
 
-export default function StatCard({ label, value, bg, textColor, icon, sub }: StatCardProps) {
+export default function StatCard({ label, value, gradient, icon, sub }: StatCardProps) {
   return (
-    <div className={`rounded-2xl p-5 flex flex-col gap-3 ${bg} relative overflow-hidden`}>
-      <div className="flex items-center justify-between">
-        <div className={`w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center ${textColor}`}>
+    <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: gradient, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white" style={{ background: 'rgba(255,255,255,0.15)' }}>
           {icon}
         </div>
         {sub && (
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full bg-white/20 ${textColor}`}>
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: 'rgba(255,255,255,0.15)' }}>
             {sub}
           </span>
         )}
       </div>
-      <div>
-        <p className={`text-3xl font-bold ${textColor}`}>{value}</p>
-        <p className={`text-sm font-medium mt-0.5 ${textColor} opacity-80`}>{label}</p>
-      </div>
-      {/* decorative circle */}
-      <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/10" />
-      <div className="absolute -bottom-8 -right-8 w-28 h-28 rounded-full bg-white/5" />
+      <p className="text-3xl font-bold text-white">{value}</p>
+      <p className="text-sm text-white/75 mt-0.5">{label}</p>
+      {/* decorative */}
+      <div className="absolute -bottom-5 -right-5 w-20 h-20 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }} />
+      <div className="absolute -bottom-8 -right-8 w-28 h-28 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }} />
     </div>
   );
 }

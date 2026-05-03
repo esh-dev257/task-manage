@@ -9,16 +9,20 @@ import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
 import { TaskSkeleton } from '../components/Skeleton';
 
-const COLUMNS: { key: Task['status']; label: string; color: string; bg: string }[] = [
-  { key: 'todo',        label: 'To Do',       color: 'border-t-gray-400',  bg: 'bg-gray-50' },
-  { key: 'in-progress', label: 'In Progress', color: 'border-t-blue-500',  bg: 'bg-blue-50/40' },
-  { key: 'completed',   label: 'Completed',   color: 'border-t-green-500', bg: 'bg-green-50/40' },
+const COLUMNS: { key: Task['status']; label: string; accent: string; dragBg: string }[] = [
+  { key: 'todo',        label: 'To Do',       accent: 'rgba(139,92,246,0.6)',  dragBg: 'rgba(139,92,246,0.08)' },
+  { key: 'in-progress', label: 'In Progress', accent: 'rgba(59,130,246,0.6)',  dragBg: 'rgba(59,130,246,0.08)'  },
+  { key: 'completed',   label: 'Completed',   accent: 'rgba(52,211,153,0.6)',  dragBg: 'rgba(52,211,153,0.08)'  },
 ];
 
 const STATUS_LABELS: Record<Task['status'], string> = {
-  'todo': 'To Do',
-  'in-progress': 'In Progress',
-  'completed': 'Completed',
+  'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed',
+};
+
+const inputStyle: React.CSSProperties = {
+  background: 'rgba(88,28,135,0.3)',
+  border: '1px solid rgba(139,92,246,0.35)',
+  color: 'white',
 };
 
 export default function ProjectDetailPage() {
@@ -58,29 +62,22 @@ export default function ProjectDetailPage() {
       const { data } = await api.put(`/tasks/${taskId}`, { status });
       setTasks(prev => prev.map(t => t._id === taskId ? data : t));
       toast.success(`Moved to ${STATUS_LABELS[status]}`);
-    } catch {
-      toast.error('Failed to update task');
-    }
+    } catch { toast.error('Failed to update task'); }
   };
 
   const handleDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
-
     const srcCol = source.droppableId as Task['status'];
     const dstCol = destination.droppableId as Task['status'];
-
     if (srcCol === dstCol && source.index === destination.index) return;
 
-    // Optimistically reorder local state
     setTasks(prev => {
       const next = [...prev];
       const taskIdx = next.findIndex(t => t._id === draggableId);
       if (taskIdx === -1) return prev;
       const [moved] = next.splice(taskIdx, 1);
       moved.status = dstCol;
-
-      // Insert at correct position within destination column
       const dstTasks = next.filter(t => t.status === dstCol);
       const insertBefore = dstTasks[destination.index];
       const insertIdx = insertBefore ? next.findIndex(t => t._id === insertBefore._id) : next.length;
@@ -88,14 +85,13 @@ export default function ProjectDetailPage() {
       return next;
     });
 
-    // If moved to a different column, persist status change
     if (srcCol !== dstCol) {
       try {
         await api.put(`/tasks/${draggableId}`, { status: dstCol });
         toast.success(`Moved to ${STATUS_LABELS[dstCol]}`);
       } catch {
         toast.error('Failed to move task');
-        load(); // revert on failure
+        load();
       }
     }
   };
@@ -106,9 +102,7 @@ export default function ProjectDetailPage() {
       await api.delete(`/tasks/${taskId}`);
       setTasks(prev => prev.filter(t => t._id !== taskId));
       toast.success('Task deleted');
-    } catch {
-      toast.error('Failed to delete task');
-    }
+    } catch { toast.error('Failed to delete task'); }
   };
 
   const handleAddMember = async (e: React.FormEvent) => {
@@ -120,12 +114,10 @@ export default function ProjectDetailPage() {
       setProject(data);
       setMemberEmail('');
       setShowAddMember(false);
-      toast.success(`Member added successfully`);
+      toast.success('Member added successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to add member');
-    } finally {
-      setAddingMember(false);
-    }
+    } finally { setAddingMember(false); }
   };
 
   const handleRemoveMember = async (userId: string, name: string) => {
@@ -141,7 +133,7 @@ export default function ProjectDetailPage() {
 
   if (loading) return (
     <div className="p-8 space-y-6">
-      <div className="h-7 bg-gray-200 rounded w-48 animate-pulse" />
+      <div className="h-7 rounded w-48 animate-pulse" style={{ background: 'rgba(139,92,246,0.2)' }} />
       <div className="grid grid-cols-3 gap-4">
         {Array(3).fill(0).map((_, i) => (
           <div key={i} className="space-y-3">{Array(2).fill(0).map((_, j) => <TaskSkeleton key={j} />)}</div>
@@ -150,19 +142,21 @@ export default function ProjectDetailPage() {
     </div>
   );
 
-  if (!project) return <div className="p-8 text-gray-500">Project not found</div>;
+  if (!project) return <div className="p-8 text-purple-400">Project not found</div>;
 
   return (
     <div className="p-8">
+      {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-          {project.description && <p className="text-gray-500 text-sm mt-1">{project.description}</p>}
+          <h1 className="text-2xl font-bold text-white">{project.name}</h1>
+          {project.description && <p className="text-purple-400 text-sm mt-1">{project.description}</p>}
         </div>
         {isAdmin && (
           <Link
             to={`/projects/${id}/tasks/new`}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:scale-105"
+            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 15px rgba(124,58,237,0.4)' }}
           >
             <Plus size={16} /> New Task
           </Link>
@@ -170,14 +164,12 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Members */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+      <div className="rounded-2xl p-5 mb-6" style={{ background: 'rgba(20,8,46,0.8)', border: '1px solid rgba(139,92,246,0.2)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-gray-900">Team Members</h2>
+          <h2 className="font-semibold text-white">Team Members</h2>
           {isAdmin && (
-            <button
-              onClick={() => setShowAddMember(s => !s)}
-              className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
+            <button onClick={() => setShowAddMember(s => !s)}
+              className="flex items-center gap-1.5 text-sm text-purple-400 hover:text-purple-200 font-medium transition-colors">
               <UserPlus size={15} /> Add Member
             </button>
           )}
@@ -190,17 +182,21 @@ export default function ProjectDetailPage() {
               onChange={e => setMemberEmail(e.target.value)}
               type="email"
               placeholder="member@example.com"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500"
+              className="flex-1 px-3 py-2.5 rounded-xl text-sm placeholder-purple-600 outline-none"
+              style={inputStyle}
             />
             <select
               value={memberRole}
               onChange={e => setMemberRole(e.target.value as 'admin' | 'member')}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-indigo-500"
+              className="px-3 py-2.5 rounded-xl text-sm outline-none"
+              style={inputStyle}
             >
               <option value="member">Member</option>
               <option value="admin">Admin</option>
             </select>
-            <button type="submit" disabled={addingMember} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium">
+            <button type="submit" disabled={addingMember}
+              className="px-4 py-2 text-white rounded-xl text-sm font-bold disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
               {addingMember ? '…' : 'Add'}
             </button>
           </form>
@@ -208,19 +204,19 @@ export default function ProjectDetailPage() {
 
         <div className="flex flex-wrap gap-3">
           {project.members.map(m => (
-            <div key={m.user._id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-              <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs font-bold">
+            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(88,28,135,0.2)', border: '1px solid rgba(139,92,246,0.2)' }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
                 {m.user.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                <p className="text-sm font-medium text-white flex items-center gap-1">
                   {m.user.name}
-                  {m.role === 'admin' && <Crown size={12} className="text-yellow-500" />}
+                  {m.role === 'admin' && <Crown size={11} className="text-yellow-400" />}
                 </p>
-                <p className="text-xs text-gray-500">{m.user.email}</p>
+                <p className="text-xs text-purple-400">{m.user.email}</p>
               </div>
               {isAdmin && m.user._id !== user?._id && m.user._id !== project.createdBy._id && (
-                <button onClick={() => handleRemoveMember(m.user._id, m.user.name)} className="ml-1 text-gray-400 hover:text-red-500 transition-colors">
+                <button onClick={() => handleRemoveMember(m.user._id, m.user.name)} className="ml-1 text-purple-600 hover:text-red-400 transition-colors">
                   <Trash2 size={13} />
                 </button>
               )}
@@ -229,20 +225,24 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Kanban Board with Drag & Drop */}
-      <p className="text-xs text-gray-400 mb-3 flex items-center gap-1">
-        <GripVertical size={13} /> Drag tasks between columns to update their status
+      {/* Drag hint */}
+      <p className="text-xs text-purple-600 mb-3 flex items-center gap-1">
+        <GripVertical size={13} /> Drag tasks between columns to update status
       </p>
 
+      {/* Kanban */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {COLUMNS.map(col => {
             const colTasks = tasks.filter(t => t.status === col.key);
             return (
-              <div key={col.key} className={`rounded-xl border border-gray-200 border-t-4 ${col.color}`}>
-                <div className="px-4 py-3 border-b border-gray-100 bg-white rounded-t-xl flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-700 text-sm">{col.label}</h3>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">{colTasks.length}</span>
+              <div key={col.key} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(20,8,46,0.8)', border: '1px solid rgba(139,92,246,0.2)' }}>
+                {/* Column header with accent top border */}
+                <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(139,92,246,0.15)', borderTop: `3px solid ${col.accent}` }}>
+                  <h3 className="font-semibold text-white text-sm">{col.label}</h3>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold text-white" style={{ background: col.accent }}>
+                    {colTasks.length}
+                  </span>
                 </div>
 
                 <Droppable droppableId={col.key}>
@@ -250,10 +250,11 @@ export default function ProjectDetailPage() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`p-3 min-h-[200px] transition-colors rounded-b-xl ${snapshot.isDraggingOver ? 'bg-indigo-50/60' : col.bg}`}
+                      className="p-3 min-h-50 transition-colors"
+                      style={{ background: snapshot.isDraggingOver ? col.dragBg : 'transparent' }}
                     >
                       {colTasks.length === 0 && !snapshot.isDraggingOver && (
-                        <p className="text-xs text-gray-400 text-center py-6">No tasks</p>
+                        <p className="text-xs text-purple-700 text-center py-8">No tasks</p>
                       )}
                       {colTasks.map((t, index) => (
                         <Draggable key={t._id} draggableId={t._id} index={index}>
@@ -261,12 +262,13 @@ export default function ProjectDetailPage() {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              className={`mb-3 transition-shadow ${snapshot.isDragging ? 'rotate-1 scale-105 shadow-xl' : ''}`}
+                              className={`mb-3 transition-all ${snapshot.isDragging ? 'rotate-1 scale-105' : ''}`}
+                              style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(0 10px 30px rgba(124,58,237,0.5))' : undefined }}
                             >
                               <div className="relative group">
                                 <div
                                   {...provided.dragHandleProps}
-                                  className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500"
+                                  className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-purple-700 hover:text-purple-400"
                                 >
                                   <GripVertical size={14} />
                                 </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { CheckSquare, Mail, Lock } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -38,98 +38,100 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#f5f6fa]">
-      {/* Left panel */}
-      <div className="hidden lg:flex w-1/2 bg-linear-to-br from-indigo-600 via-purple-600 to-indigo-700 items-center justify-center p-16 relative overflow-hidden">
-        <div className="relative z-10 text-white max-w-sm">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <CheckSquare size={20} className="text-white" />
-            </div>
-            <span className="text-2xl font-bold">TaskFlow</span>
-          </div>
-          <h2 className="text-4xl font-bold leading-tight mb-4">Manage your team's work, effortlessly.</h2>
-          <p className="text-indigo-200 text-lg">Projects, tasks, and team collaboration — all in one place.</p>
+    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #0f0520 0%, #2d1065 50%, #4a1a7a 100%)' }}>
+      {/* Decorative circles */}
+      <div className="fixed top-[-80px] left-[-80px] w-72 h-72 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #a855f7, transparent)' }} />
+      <div className="fixed bottom-[-60px] left-[15%] w-48 h-48 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #7c3aed, transparent)' }} />
+      <div className="fixed top-[20%] right-[5%] w-32 h-32 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #c084fc, transparent)' }} />
 
-          <div className="mt-12 space-y-4">
-            {['Role-based access control', 'Kanban task boards', 'Real-time dashboard'].map(f => (
-              <div key={f} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                  <CheckSquare size={11} className="text-white" />
-                </div>
-                <span className="text-indigo-100 text-sm">{f}</span>
-              </div>
-            ))}
+      {/* Left welcome panel */}
+      <div className="hidden lg:flex w-1/2 flex-col justify-center px-16 relative z-10">
+        <div className="flex items-center gap-3 mb-16">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.2)', border: '1px solid rgba(167,139,250,0.3)' }}>
+            <CheckSquare size={20} className="text-purple-300" />
           </div>
+          <span className="text-xl font-bold text-white">TaskFlow</span>
         </div>
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/20 rounded-full translate-y-1/3 -translate-x-1/3" />
+        <h1 className="text-6xl font-bold text-white mb-4" style={{ fontFamily: 'serif' }}>Welcome</h1>
+        <p className="text-purple-300 text-lg">Have a great journey ahead...</p>
+        <div className="mt-10 space-y-3">
+          {['Manage projects & teams', 'Drag-and-drop Kanban boards', 'Role-based access control'].map(f => (
+            <div key={f} className="flex items-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+              <span className="text-purple-300 text-sm">{f}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-10">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <CheckSquare size={16} className="text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">TaskFlow</span>
+      {/* Right form panel */}
+      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
+        <div className="w-full max-w-sm rounded-2xl p-8" style={{ background: 'rgba(30, 10, 60, 0.85)', backdropFilter: 'blur(20px)', border: '1px solid rgba(139, 92, 246, 0.2)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
+
+          <div className="lg:hidden flex items-center gap-2 mb-6">
+            <CheckSquare size={18} className="text-purple-400" />
+            <span className="text-white font-bold">TaskFlow</span>
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome back</h1>
-          <p className="text-gray-400 text-sm mb-8">Sign in to your workspace</p>
+          <h2 className="text-xl font-bold text-white mb-6">Sign In</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="you@example.com"
-                  className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
-                />
-              </div>
-              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+              <label className="block text-sm text-purple-300 mb-1.5">Username / Email</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="admin@demo.com"
+                className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-purple-500 outline-none transition-all"
+                style={{ background: 'rgba(88, 28, 135, 0.3)', border: `1px solid ${errors.email ? '#f87171' : 'rgba(139,92,246,0.35)'}` }}
+              />
+              {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="password"
-                  value={form.password}
-                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                  placeholder="••••••••"
-                  className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
-                />
-              </div>
-              {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+              <label className="block text-sm text-purple-300 mb-1.5">Password</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-purple-500 outline-none transition-all"
+                style={{ background: 'rgba(88, 28, 135, 0.3)', border: `1px solid ${errors.password ? '#f87171' : 'rgba(139,92,246,0.35)'}` }}
+              />
+              {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
             </div>
 
-            {/* Demo credentials */}
-            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3.5 text-xs text-indigo-700 space-y-0.5">
-              <p className="font-semibold mb-1">Demo credentials</p>
-              <p>Admin: <span className="font-mono">admin@demo.com</span> / <span className="font-mono">demo1234</span></p>
-              <p>Member: <span className="font-mono">member@demo.com</span> / <span className="font-mono">demo1234</span></p>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-xs text-purple-300 cursor-pointer">
+                <input type="checkbox" className="accent-violet-500 rounded" />
+                Remember me
+              </label>
+            </div>
+
+            {/* Demo hint */}
+            <div className="rounded-xl px-3 py-2.5 text-xs" style={{ background: 'rgba(88,28,135,0.25)', border: '1px solid rgba(139,92,246,0.2)' }}>
+              <p className="text-purple-300 font-semibold mb-1">Demo</p>
+              <p className="text-purple-400">admin@demo.com / demo1234</p>
+              <p className="text-purple-400">member@demo.com / demo1234</p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-200 text-sm"
+              className="w-full py-3 rounded-xl text-white font-bold text-sm tracking-wide uppercase transition-all disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-400 mt-6">
-            No account?{' '}
-            <Link to="/signup" className="text-indigo-600 hover:underline font-semibold">Sign up for free</Link>
+          <p className="text-center text-xs text-purple-400 mt-5">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-purple-300 hover:text-white font-semibold transition-colors">Sign Up</Link>
+          </p>
+          <p className="text-center text-xs text-purple-500 mt-2 cursor-pointer hover:text-purple-400 transition-colors">
+            Forgot Password
           </p>
         </div>
       </div>
