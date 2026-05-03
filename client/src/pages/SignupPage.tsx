@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, Mail, Lock, User } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -30,7 +30,7 @@ export default function SignupPage() {
     try {
       const { data } = await api.post('/auth/signup', form);
       login(data.token, data.user);
-      toast.success('Account created!');
+      toast.success(`Welcome to TaskFlow, ${data.user.name}!`);
       navigate('/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Signup failed';
@@ -40,45 +40,75 @@ export default function SignupPage() {
     }
   };
 
+  const fields = [
+    { key: 'name' as const,     label: 'Full Name', type: 'text',     placeholder: 'Jane Doe',           Icon: User },
+    { key: 'email' as const,    label: 'Email',     type: 'email',    placeholder: 'you@example.com',    Icon: Mail },
+    { key: 'password' as const, label: 'Password',  type: 'password', placeholder: '••••••••',           Icon: Lock },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <CheckSquare className="text-indigo-600" size={28} />
-            <span className="text-2xl font-bold text-gray-900">TaskFlow</span>
-          </div>
-          <p className="text-gray-500">Create your workspace</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-5">
-          {(['name', 'email', 'password'] as const).map(field => (
-            <div key={field}>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5 capitalize">{field}</label>
-              <input
-                type={field === 'password' ? 'password' : field === 'email' ? 'email' : 'text'}
-                value={form[field]}
-                onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
-                placeholder={field === 'name' ? 'Jane Doe' : field === 'email' ? 'you@example.com' : '••••••••'}
-                className={`w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 ${errors[field] ? 'border-red-400' : 'border-gray-300'}`}
-              />
-              {errors[field] && <p className="text-xs text-red-500 mt-1">{errors[field]}</p>}
+    <div className="min-h-screen flex bg-[#f5f6fa]">
+      {/* Left panel */}
+      <div className="hidden lg:flex w-1/2 bg-linear-to-br from-violet-600 via-purple-600 to-indigo-700 items-center justify-center p-16 relative overflow-hidden">
+        <div className="relative z-10 text-white max-w-sm">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <CheckSquare size={20} className="text-white" />
             </div>
-          ))}
+            <span className="text-2xl font-bold">TaskFlow</span>
+          </div>
+          <h2 className="text-4xl font-bold leading-tight mb-4">Start collaborating in minutes.</h2>
+          <p className="text-purple-200 text-lg">Create your workspace and invite your team today.</p>
+        </div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/20 rounded-full translate-y-1/3 -translate-x-1/3" />
+      </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold rounded-lg transition-colors text-sm"
-          >
-            {loading ? 'Creating account…' : 'Create account'}
-          </button>
+      {/* Right panel */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <div className="lg:hidden flex items-center gap-2 mb-10">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <CheckSquare size={16} className="text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">TaskFlow</span>
+          </div>
 
-          <p className="text-center text-sm text-gray-500">
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">Create account</h1>
+          <p className="text-gray-400 text-sm mb-8">Get started with your free workspace</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {fields.map(({ key, label, type, placeholder, Icon }) => (
+              <div key={key}>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
+                <div className="relative">
+                  <Icon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={type}
+                    value={form[key]}
+                    onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 ${errors[key] ? 'border-red-400' : 'border-gray-200'}`}
+                  />
+                </div>
+                {errors[key] && <p className="text-xs text-red-500 mt-1">{errors[key]}</p>}
+              </div>
+            ))}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-200 text-sm mt-2"
+            >
+              {loading ? 'Creating account…' : 'Create account'}
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-gray-400 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-indigo-600 hover:underline font-medium">Sign in</Link>
+            <Link to="/login" className="text-indigo-600 hover:underline font-semibold">Sign in</Link>
           </p>
-        </form>
+        </div>
       </div>
     </div>
   );
