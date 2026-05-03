@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, FolderKanban, LogOut, CheckSquare } from 'lucide-react';
 
@@ -6,7 +7,11 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => {
+    logout();
+    toast.success('Signed out successfully');
+    navigate('/login');
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">

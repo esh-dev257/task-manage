@@ -1,18 +1,25 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Plus, UserPlus, Trash2, Crown, User } from 'lucide-react';
+import { Plus, UserPlus, Trash2, Crown, GripVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import api from '../lib/api';
 import type { Project, Task } from '../types';
 import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
 import { TaskSkeleton } from '../components/Skeleton';
 
-const COLUMNS: { key: Task['status']; label: string; color: string }[] = [
-  { key: 'todo', label: 'To Do', color: 'border-t-gray-400' },
-  { key: 'in-progress', label: 'In Progress', color: 'border-t-blue-500' },
-  { key: 'completed', label: 'Completed', color: 'border-t-green-500' },
+const COLUMNS: { key: Task['status']; label: string; color: string; bg: string }[] = [
+  { key: 'todo',        label: 'To Do',       color: 'border-t-gray-400',  bg: 'bg-gray-50' },
+  { key: 'in-progress', label: 'In Progress', color: 'border-t-blue-500',  bg: 'bg-blue-50/40' },
+  { key: 'completed',   label: 'Completed',   color: 'border-t-green-500', bg: 'bg-green-50/40' },
 ];
+
+const STATUS_LABELS: Record<Task['status'], string> = {
+  'todo': 'To Do',
+  'in-progress': 'In Progress',
+  'completed': 'Completed',
+};
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -50,9 +57,46 @@ export default function ProjectDetailPage() {
     try {
       const { data } = await api.put(`/tasks/${taskId}`, { status });
       setTasks(prev => prev.map(t => t._id === taskId ? data : t));
-      toast.success('Status updated');
+      toast.success(`Moved to ${STATUS_LABELS[status]}`);
     } catch {
       toast.error('Failed to update task');
+    }
+  };
+
+  const handleDragEnd = async (result: DropResult) => {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+
+    const srcCol = source.droppableId as Task['status'];
+    const dstCol = destination.droppableId as Task['status'];
+
+    if (srcCol === dstCol && source.index === destination.index) return;
+
+    // Optimistically reorder local state
+    setTasks(prev => {
+      const next = [...prev];
+      const taskIdx = next.findIndex(t => t._id === draggableId);
+      if (taskIdx === -1) return prev;
+      const [moved] = next.splice(taskIdx, 1);
+      moved.status = dstCol;
+
+      // Insert at correct position within destination column
+      const dstTasks = next.filter(t => t.status === dstCol);
+      const insertBefore = dstTasks[destination.index];
+      const insertIdx = insertBefore ? next.findIndex(t => t._id === insertBefore._id) : next.length;
+      next.splice(insertIdx, 0, moved);
+      return next;
+    });
+
+    // If moved to a different column, persist status change
+    if (srcCol !== dstCol) {
+      try {
+        await api.put(`/tasks/${draggableId}`, { status: dstCol });
+        toast.success(`Moved to ${STATUS_LABELS[dstCol]}`);
+      } catch {
+        toast.error('Failed to move task');
+        load(); // revert on failure
+      }
     }
   };
 
@@ -76,7 +120,7 @@ export default function ProjectDetailPage() {
       setProject(data);
       setMemberEmail('');
       setShowAddMember(false);
-      toast.success('Member added');
+      toast.success(`Member added successfully`);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to add member');
     } finally {
@@ -84,12 +128,12 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleRemoveMember = async (userId: string) => {
-    if (!confirm('Remove this member?')) return;
+  const handleRemoveMember = async (userId: string, name: string) => {
+    if (!confirm(`Remove ${name} from this project?`)) return;
     try {
       await api.delete(`/projects/${id}/members/${userId}`);
       setProject(prev => prev ? { ...prev, members: prev.members.filter(m => m.user._id !== userId) } : prev);
-      toast.success('Member removed');
+      toast.success(`${name} removed from project`);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to remove member');
     }
@@ -125,6 +169,7 @@ export default function ProjectDetailPage() {
         )}
       </div>
 
+      {/* Members */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-gray-900">Team Members</h2>
@@ -175,7 +220,7 @@ export default function ProjectDetailPage() {
                 <p className="text-xs text-gray-500">{m.user.email}</p>
               </div>
               {isAdmin && m.user._id !== user?._id && m.user._id !== project.createdBy._id && (
-                <button onClick={() => handleRemoveMember(m.user._id)} className="ml-1 text-gray-400 hover:text-red-500 transition-colors">
+                <button onClick={() => handleRemoveMember(m.user._id, m.user.name)} className="ml-1 text-gray-400 hover:text-red-500 transition-colors">
                   <Trash2 size={13} />
                 </button>
               )}
@@ -184,34 +229,67 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {COLUMNS.map(col => {
-          const colTasks = tasks.filter(t => t.status === col.key);
-          return (
-            <div key={col.key} className={`bg-white rounded-xl border border-gray-200 border-t-4 ${col.color}`}>
-              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="font-semibold text-gray-700 text-sm">{col.label}</h3>
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">{colTasks.length}</span>
+      {/* Kanban Board with Drag & Drop */}
+      <p className="text-xs text-gray-400 mb-3 flex items-center gap-1">
+        <GripVertical size={13} /> Drag tasks between columns to update their status
+      </p>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {COLUMNS.map(col => {
+            const colTasks = tasks.filter(t => t.status === col.key);
+            return (
+              <div key={col.key} className={`rounded-xl border border-gray-200 border-t-4 ${col.color}`}>
+                <div className="px-4 py-3 border-b border-gray-100 bg-white rounded-t-xl flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-700 text-sm">{col.label}</h3>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">{colTasks.length}</span>
+                </div>
+
+                <Droppable droppableId={col.key}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`p-3 min-h-[200px] transition-colors rounded-b-xl ${snapshot.isDraggingOver ? 'bg-indigo-50/60' : col.bg}`}
+                    >
+                      {colTasks.length === 0 && !snapshot.isDraggingOver && (
+                        <p className="text-xs text-gray-400 text-center py-6">No tasks</p>
+                      )}
+                      {colTasks.map((t, index) => (
+                        <Draggable key={t._id} draggableId={t._id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`mb-3 transition-shadow ${snapshot.isDragging ? 'rotate-1 scale-105 shadow-xl' : ''}`}
+                            >
+                              <div className="relative group">
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500"
+                                >
+                                  <GripVertical size={14} />
+                                </div>
+                                <TaskCard
+                                  task={t}
+                                  onStatusChange={handleStatusChange}
+                                  isAdmin={isAdmin}
+                                  onDelete={isAdmin ? handleDeleteTask : undefined}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
-              <div className="p-3 space-y-3 min-h-[200px]">
-                {colTasks.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-6">No tasks</p>
-                ) : (
-                  colTasks.map(t => (
-                    <TaskCard
-                      key={t._id}
-                      task={t}
-                      onStatusChange={handleStatusChange}
-                      isAdmin={isAdmin}
-                      onDelete={isAdmin ? handleDeleteTask : undefined}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
     </div>
   );
 }
