@@ -6,8 +6,12 @@ const populateTask = (q) =>
   q.populate('assignedTo', 'name email').populate('createdBy', 'name email').populate('project', 'name');
 
 exports.getTasks = async (req, res) => {
-  const { projectId } = req.query;
+  const { projectId, status, priority, page: rawPage, limit: rawLimit } = req.query;
   if (!projectId) return res.status(400).json({ message: 'projectId required' });
+
+  const page  = Math.max(1, parseInt(rawPage)  || 1);
+  const limit = Math.min(100, parseInt(rawLimit) || 50);
+  const skip  = (page - 1) * limit;
 
   try {
     const project = await Project.findById(projectId);
@@ -16,8 +20,16 @@ exports.getTasks = async (req, res) => {
     const isMember = project.members.some(m => m.user.toString() === req.user._id.toString());
     if (!isMember) return res.status(403).json({ message: 'Not a project member' });
 
-    const tasks = await populateTask(Task.find({ project: projectId }).sort('-createdAt'));
-    res.json(tasks);
+    const filter = { project: projectId };
+    if (status)   filter.status   = status;
+    if (priority) filter.priority = priority;
+
+    const [tasks, total] = await Promise.all([
+      populateTask(Task.find(filter).sort('-createdAt').skip(skip).limit(limit)),
+      Task.countDocuments(filter),
+    ]);
+
+    res.json({ tasks, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -60,7 +72,7 @@ exports.createTask = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { title, description, projectId, assignedTo, priority, dueDate, status } = req.body;
+  const { title, description, projectId, assignedTo, priority, dueDate, status, attachmentUrl } = req.body;
   try {
     const project = await Project.findById(projectId);
     if (!project) return res.status(404).json({ message: 'Project not found' });
@@ -83,6 +95,7 @@ exports.createTask = async (req, res) => {
       assignedTo: assignedTo || null,
       createdBy: req.user._id,
       priority, dueDate, status,
+      attachmentUrl: attachmentUrl || '',
     });
 
     res.status(201).json(await populateTask(Task.findById(task._id)));
@@ -109,13 +122,14 @@ exports.updateTask = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to update this task' });
     }
 
-    const { title, description, assignedTo, priority, dueDate, status } = req.body;
+    const { title, description, assignedTo, priority, dueDate, status, attachmentUrl } = req.body;
 
     if (isAdmin) {
       if (title !== undefined) task.title = title;
       if (description !== undefined) task.description = description;
       if (priority !== undefined) task.priority = priority;
       if (dueDate !== undefined) task.dueDate = dueDate;
+      if (attachmentUrl !== undefined) task.attachmentUrl = attachmentUrl;
       if (assignedTo !== undefined) {
         if (assignedTo) {
           const isMember = project.members.some(m => m.user.toString() === assignedTo);

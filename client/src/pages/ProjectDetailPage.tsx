@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Plus, UserPlus, Trash2, Crown, GripVertical } from 'lucide-react';
+import { Plus, UserPlus, Trash2, Crown, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import api from '../lib/api';
@@ -31,31 +31,40 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [taskPage, setTaskPage] = useState(1);
+  const [taskPages, setTaskPages] = useState(1);
   const [showAddMember, setShowAddMember] = useState(false);
   const [memberEmail, setMemberEmail] = useState('');
   const [memberRole, setMemberRole] = useState<'admin' | 'member'>('member');
   const [addingMember, setAddingMember] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const myRole = project?.members.find(m => m.user._id === user?._id)?.role;
   const isAdmin = myRole === 'admin';
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [pRes, tRes] = await Promise.all([
         api.get(`/projects/${id}`),
-        api.get(`/tasks?projectId=${id}`),
+        api.get(`/tasks?projectId=${id}&page=${taskPage}&limit=50`),
       ]);
       setProject(pRes.data);
-      setTasks(tRes.data);
+      setTasks(tRes.data.tasks);
+      setTaskPages(tRes.data.pages);
     } catch {
-      toast.error('Failed to load project');
+      if (!silent) toast.error('Failed to load project');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  }, [id]);
+  }, [id, taskPage]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    pollRef.current = setInterval(() => load(true), 30_000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [load]);
 
   const handleStatusChange = async (taskId: string, status: Task['status']) => {
     try {
@@ -292,6 +301,28 @@ export default function ProjectDetailPage() {
           })}
         </div>
       </DragDropContext>
+
+      {taskPages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <button
+            onClick={() => setTaskPage(p => Math.max(1, p - 1))}
+            disabled={taskPage === 1}
+            className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-semibold text-purple-300 disabled:opacity-40 transition-all hover:text-white"
+            style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(88,28,135,0.2)' }}
+          >
+            <ChevronLeft size={14} /> Prev
+          </button>
+          <span className="text-sm text-purple-400">Page {taskPage} of {taskPages}</span>
+          <button
+            onClick={() => setTaskPage(p => Math.min(taskPages, p + 1))}
+            disabled={taskPage === taskPages}
+            className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-semibold text-purple-300 disabled:opacity-40 transition-all hover:text-white"
+            style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(88,28,135,0.2)' }}
+          >
+            Next <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

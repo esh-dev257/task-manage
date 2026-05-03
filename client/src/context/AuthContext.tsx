@@ -18,33 +18,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
+    // Try to restore session — works via httpOnly cookie or localStorage token fallback
     const savedUser = localStorage.getItem('user');
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      api.get('/auth/me').then(r => {
+    if (savedUser) setUser(JSON.parse(savedUser));
+
+    api.get('/auth/me')
+      .then(r => {
         setUser(r.data.user);
+        setToken(localStorage.getItem('token'));
         localStorage.setItem('user', JSON.stringify(r.data.user));
-      }).catch(() => {
+      })
+      .catch(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setToken(null);
         setUser(null);
-      }).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = (t: string, u: User) => {
     setToken(t);
     setUser(u);
-    localStorage.setItem('token', t);
+    localStorage.setItem('token', t);     // fallback for non-cookie environments
     localStorage.setItem('user', JSON.stringify(u));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await api.post('/auth/logout'); } catch { /* ignore */ }
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');

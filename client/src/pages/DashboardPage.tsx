@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { CheckCircle2, Clock, AlertTriangle, ListTodo, BarChart3, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
@@ -35,11 +35,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchDashboard = (silent = false) => {
+    if (!silent) setLoading(true);
     api.get('/tasks/dashboard')
       .then(r => setData(r.data))
-      .catch(() => toast.error('Failed to load dashboard'))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!silent) toast.error('Failed to load dashboard'); })
+      .finally(() => { if (!silent) setLoading(false); });
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+    pollRef.current = setInterval(() => fetchDashboard(true), 30_000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 
   const handleStatusChange = async (taskId: string, status: Task['status']) => {

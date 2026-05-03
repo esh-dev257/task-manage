@@ -18,17 +18,24 @@ const PROJECT_GRADIENTS = [
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', description: '' });
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    api.get('/projects')
-      .then(r => setProjects(r.data))
+    api.get(`/projects?page=${page}&limit=9`)
+      .then(r => {
+        setProjects(r.data.projects);
+        setTotal(r.data.total);
+        setPages(r.data.pages);
+      })
       .catch(() => toast.error('Failed to load projects'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [page]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +44,7 @@ export default function ProjectsPage() {
     try {
       const { data } = await api.post('/projects', form);
       setProjects(prev => [data, ...prev]);
+      setTotal(prev => prev + 1);
       setShowModal(false);
       setForm({ name: '', description: '' });
       toast.success(`Project "${data.name}" created!`);
@@ -50,7 +58,7 @@ export default function ProjectsPage() {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-7">
-        <p className="text-sm text-purple-400">{projects.length} project{projects.length !== 1 ? 's' : ''}</p>
+        <p className="text-sm text-purple-400">{total} project{total !== 1 ? 's' : ''}</p>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:scale-105"
@@ -134,6 +142,29 @@ export default function ProjectsPage() {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-8">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-purple-300 disabled:opacity-40 transition-all hover:text-white"
+            style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(88,28,135,0.2)' }}
+          >
+            ← Prev
+          </button>
+          <span className="text-sm text-purple-400">Page {page} of {pages}</span>
+          <button
+            onClick={() => setPage(p => Math.min(pages, p + 1))}
+            disabled={page === pages}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-purple-300 disabled:opacity-40 transition-all hover:text-white"
+            style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(88,28,135,0.2)' }}
+          >
+            Next →
+          </button>
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import { Calendar, User, AlertCircle, Trash2 } from 'lucide-react';
+import { Calendar, User, AlertCircle, Trash2, Paperclip } from 'lucide-react';
 import type { Task } from '../types';
 
 const priorityStyles = {
@@ -36,6 +36,19 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
 
       {task.description && (
         <p className="text-xs text-purple-400 line-clamp-2">{task.description}</p>
+      )}
+
+      {task.attachmentUrl && (
+        <a
+          href={task.attachmentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-200 transition-colors truncate"
+          onClick={e => e.stopPropagation()}
+        >
+          <Paperclip size={11} />
+          <span className="truncate">Attachment</span>
+        </a>
       )}
 
       <div>

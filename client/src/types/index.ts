@@ -29,6 +29,7 @@ export interface Task {
   status: 'todo' | 'in-progress' | 'completed';
   priority: 'low' | 'medium' | 'high';
   dueDate: string | null;
+  attachmentUrl: string;
   createdAt: string;
 }
 

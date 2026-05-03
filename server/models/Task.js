@@ -9,6 +9,7 @@ const taskSchema = new mongoose.Schema({
   status: { type: String, enum: ['todo', 'in-progress', 'completed'], default: 'todo' },
   priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
   dueDate: { type: Date, default: null },
+  attachmentUrl: { type: String, trim: true, default: '' },
   createdAt: { type: Date, default: Date.now },
 });
 

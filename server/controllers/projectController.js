@@ -4,12 +4,20 @@ const User = require('../models/User');
 const Task = require('../models/Task');
 
 exports.listProjects = async (req, res) => {
+  const page  = Math.max(1, parseInt(req.query.page)  || 1);
+  const limit = Math.min(50, parseInt(req.query.limit) || 9);
+  const skip  = (page - 1) * limit;
   try {
-    const projects = await Project.find({ 'members.user': req.user._id })
-      .populate('createdBy', 'name email')
-      .populate('members.user', 'name email')
-      .sort('-createdAt');
-    res.json(projects);
+    const [projects, total] = await Promise.all([
+      Project.find({ 'members.user': req.user._id })
+        .populate('createdBy', 'name email')
+        .populate('members.user', 'name email')
+        .sort('-createdAt')
+        .skip(skip)
+        .limit(limit),
+      Project.countDocuments({ 'members.user': req.user._id }),
+    ]);
+    res.json({ projects, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

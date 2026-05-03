@@ -17,7 +17,7 @@ export default function NewTaskPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
-  const [form, setForm] = useState({ title: '', description: '', assignedTo: '', priority: 'medium', dueDate: '', status: 'todo' });
+  const [form, setForm] = useState({ title: '', description: '', assignedTo: '', priority: 'medium', dueDate: '', status: 'todo', attachmentUrl: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
@@ -132,6 +132,18 @@ export default function NewTaskPage() {
             />
             {errors.dueDate && <p className="text-xs text-red-400 mt-1">{errors.dueDate}</p>}
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-purple-300 mb-1.5">Attachment URL</label>
+          <input
+            value={form.attachmentUrl}
+            onChange={e => f('attachmentUrl', e.target.value)}
+            placeholder="https://drive.google.com/…"
+            type="url"
+            className="w-full px-4 py-3 rounded-xl text-sm placeholder-purple-600 outline-none"
+            style={inputStyle}
+          />
         </div>
 
         <div className="flex gap-3 pt-2">
