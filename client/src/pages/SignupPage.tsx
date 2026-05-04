@@ -41,7 +41,7 @@ export default function SignupPage() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data } = await api.post("/api/auth/signup", form);
+      const { data } = await api.post("/auth/signup", form);
       login(data.token, data.user);
       toast.success(`Welcome to TaskFlow, ${data.user.name}!`);
       navigate("/dashboard");

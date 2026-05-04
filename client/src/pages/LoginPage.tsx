@@ -39,7 +39,7 @@ export default function LoginPage() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data } = await api.post("/api/auth/login", form);
+      const { data } = await api.post("/auth/login", form);
       login(data.token, data.user);
       toast.success(`Welcome back, ${data.user.name}!`);
       navigate("/dashboard");
