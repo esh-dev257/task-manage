@@ -12,9 +12,9 @@ app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
-        ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",").map(s => s.trim()) : []),
+        process.env.CLIENT_URL,
         "http://localhost:5173",
-      ];
+      ].filter(Boolean);
       if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
       callback(new Error("Not allowed by CORS"));
     },
