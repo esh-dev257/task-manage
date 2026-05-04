@@ -12,10 +12,9 @@ app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
-        "https://faithful-freedom-production-c40d.up.railway.app",
+        process.env.CLIENT_URL,
         "http://localhost:5173",
-      ];
-      // Allow requests with no origin (mobile apps, curl, etc.)
+      ].filter(Boolean);
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
