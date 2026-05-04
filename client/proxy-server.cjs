@@ -11,11 +11,12 @@ if (!API_URL) {
   process.exit(1);
 }
 
-app.use('/api', createProxyMiddleware({
+app.use(createProxyMiddleware({
   target: API_URL,
   changeOrigin: true,
+  pathFilter: '/api',
   on: {
-    error: (err, req, res) => {
+    error: (err, _req, res) => {
       console.error('Proxy error:', err.message);
       res.status(502).json({ message: 'Backend unreachable' });
     },
