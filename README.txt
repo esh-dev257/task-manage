@@ -3,8 +3,8 @@
 ================================================================================
 
 A full-stack team task management application with role-based access control,
-drag-and-drop Kanban boards, paginated project/task lists, auto-refresh polling,
-file attachment support, and a fully responsive dark purple UI.
+drag-and-drop Kanban boards, paginated lists, auto-refresh polling, file
+attachments, and a fully responsive dark purple glassmorphism UI.
 
 --------------------------------------------------------------------------------
 LIVE DEMO
@@ -13,7 +13,7 @@ LIVE DEMO
 Live URL    : https://task-manage-one-sigma.vercel.app
 GitHub Repo : https://github.com/esh-dev257/task-manage
 
-Demo Credentials:
+Demo Credentials (use the quick-fill buttons on the login page):
   Admin  -> admin@demo.com  / demo1234
   Member -> member@demo.com / demo1234
 
@@ -25,6 +25,7 @@ TECH STACK
   Backend    : Node.js, Express.js
   Database   : MongoDB (Mongoose ODM)
   Auth       : JWT — httpOnly cookie (primary) + localStorage Bearer token fallback
+  DnD        : @hello-pangea/dnd (drag-and-drop Kanban)
   Deployment : Vercel (frontend) + Render (backend)
 
 --------------------------------------------------------------------------------
@@ -33,74 +34,90 @@ FEATURES
 
   Authentication
     - Signup / Login with bcrypt password hashing
-    - JWT stored in httpOnly cookie (XSS-safe); localStorage fallback for API clients
+    - JWT stored in httpOnly cookie (XSS-safe); localStorage Bearer token fallback
     - Session restore on page reload via /auth/me (cookie-based)
-    - Secure logout clears server cookie and localStorage
+    - Logout clears server cookie + localStorage
+    - Password show/hide toggle; demo quick-fill buttons on login page
 
   Projects
     - Create projects; creator is automatically assigned Admin role
-    - Paginated project list (9 per page) with Prev / Next controls
+    - Paginated list (9 per page) with Prev / Next controls
     - Add / remove team members with Admin or Member roles
 
   Tasks
     - Create, update, delete tasks (Admin only for create/delete)
-    - Drag-and-drop Kanban board (To Do / In Progress / Completed)
+    - Drag-and-drop Kanban board (To Do → In Progress → Completed)
     - Paginated task list (50 per page) per project
     - Filter tasks by status and priority
-    - File attachment URL on each task (shown as clickable link in task card)
-    - Overdue detection — tasks past due date flagged in red
+    - File attachment URL per task (shown as paperclip link in task card)
+    - Overdue detection — tasks past due date highlighted in red
 
   Dashboard
     - Stats cards: Total / Completed / In Progress / To Do / Overdue
-    - Filterable recent-tasks table (All / To Do / In Progress / Completed)
-    - Overdue task panel with inline status change
+    - Filterable recent-tasks table
+    - Overdue panel with inline status change
     - Auto-refreshes silently every 30 seconds
 
   Real-time Updates
-    - Dashboard and project detail auto-poll every 30 s in the background
-    - No page refresh needed to see teammates' changes
+    - Dashboard and Project Detail auto-poll every 30 s in the background
+    - No manual page refresh needed to see teammates' changes
 
   UI / UX
-    - Fully responsive — works on mobile, tablet, and desktop
-    - Mobile hamburger sidebar with smooth slide animation
-    - Dark purple glassmorphism theme throughout
+    - Fully responsive — mobile, tablet, desktop
+    - Mobile hamburger sidebar with smooth slide-in overlay animation
+    - Dark deep-purple glassmorphism theme throughout
+    - Auth pages: split-panel layout with large blob background decorations,
+      pill-shaped inputs, icon-prefixed fields, eye toggle, vibrant
+      purple→fuchsia gradient CTA button (inspired by modern finance app UI)
     - Horizontal Kanban scroll on mobile
     - Toast notifications on every action
     - Loading skeletons for smooth perceived performance
-    - Password show/hide toggle on auth forms
-    - Icon-prefixed inputs on login and signup
+
+--------------------------------------------------------------------------------
+UI THEME REFERENCE
+--------------------------------------------------------------------------------
+
+  Colour palette:
+    Background  #08011a  (deep purple-black)
+    Primary     #7c3aed  (violet-600)
+    Accent      #d946ef  (fuchsia-500)
+    Card        rgba(255,255,255,0.06) frosted glass
+    Text        white / purple-300 / purple-500
+
+  Design elements:
+    - Pill-shaped inputs (border-radius: 50px) with icon prefix
+    - Gradient CTA button: violet → purple → fuchsia, pill-shaped
+    - Large blurred radial-gradient blobs as background decoration
+    - Glassmorphism cards (backdrop-filter: blur)
+    - Accent border glow on hover / active states
 
 --------------------------------------------------------------------------------
 LOCAL SETUP
 --------------------------------------------------------------------------------
 
-Prerequisites:
-  - Node.js 18+
-  - MongoDB Atlas account (or local MongoDB)
+Prerequisites: Node.js 18+, MongoDB Atlas account (or local MongoDB)
 
-1. Clone the repository
+1. Clone the repo
    git clone https://github.com/esh-dev257/task-manage.git
    cd task-manage
 
-2. Backend setup
+2. Backend
    cd server
    copy .env.example .env          (Windows)
    cp  .env.example .env           (Mac/Linux)
-   Edit .env with your MONGO_URI, JWT_SECRET, CLIENT_URL
+   # Edit .env with MONGO_URI, JWT_SECRET, CLIENT_URL
    npm install
-   npm run dev        -> starts on http://localhost:5000
+   npm run dev        -> http://localhost:5000
 
 3. Seed demo data (optional)
-   cd server
    npm run seed
 
-4. Frontend setup
-   cd client
-   copy .env.example .env          (Windows)
-   cp  .env.example .env           (Mac/Linux)
-   Edit .env: VITE_API_URL=http://localhost:5000/api
+4. Frontend
+   cd ../client
+   copy .env.example .env
+   # Edit: VITE_API_URL=http://localhost:5000/api
    npm install
-   npm run dev        -> starts on http://localhost:5173
+   npm run dev        -> http://localhost:5173
 
 --------------------------------------------------------------------------------
 ENVIRONMENT VARIABLES
@@ -110,8 +127,8 @@ Server (server/.env):
   MONGO_URI=mongodb+srv://...
   JWT_SECRET=your_secret_key_here
   PORT=5000
-  CLIENT_URL=http://localhost:5173   (or your Vercel URL in production)
-  NODE_ENV=development               (set to "production" on Render)
+  CLIENT_URL=http://localhost:5173   (Vercel URL in production)
+  NODE_ENV=development               (set "production" on Render)
 
 Client (client/.env):
   VITE_API_URL=http://localhost:5000/api
@@ -121,37 +138,37 @@ API DOCUMENTATION
 --------------------------------------------------------------------------------
 
 AUTH ENDPOINTS
-  POST   /api/auth/signup          Register a new user             (public)
-  POST   /api/auth/login           Login — sets httpOnly cookie     (public)
-  GET    /api/auth/me              Get current user from cookie     (protected)
-  POST   /api/auth/logout          Clear auth cookie               (protected)
+  POST   /api/auth/signup    Register — sets httpOnly cookie         (public)
+  POST   /api/auth/login     Login — sets httpOnly cookie            (public)
+  GET    /api/auth/me        Restore session from cookie             (protected)
+  POST   /api/auth/logout    Clear auth cookie                       (protected)
 
-  Signup / Login body : { name?, email, password }
-  Response            : { token, user }
-  Cookie              : "token" (httpOnly, SameSite=None in production)
+  Body:  { name?, email, password }
+  Resp:  { token, user }
+  Cookie: "token" httpOnly; SameSite=None + Secure in production
 
 PROJECT ENDPOINTS
-  GET    /api/projects                      List projects (paginated)    (member)
-  POST   /api/projects                      Create a project             (any)
-  GET    /api/projects/:id                  Project detail + members     (member)
-  POST   /api/projects/:id/members          Add a member                 (admin)
-  DELETE /api/projects/:id/members/:userId  Remove a member              (admin)
+  GET    /api/projects                      List (paginated)         (member)
+  POST   /api/projects                      Create                   (any)
+  GET    /api/projects/:id                  Detail + members         (member)
+  POST   /api/projects/:id/members          Add member               (admin)
+  DELETE /api/projects/:id/members/:userId  Remove member            (admin)
 
-  List response     : { projects, total, page, pages }
-  Query params      : ?page=1&limit=9
-  Create body       : { name, description? }
-  Add member body   : { email, role: "admin"|"member" }
+  List response : { projects, total, page, pages }
+  Query params  : ?page=1&limit=9
+  Create body   : { name, description? }
+  Member body   : { email, role: "admin"|"member" }
 
 TASK ENDPOINTS
-  GET    /api/tasks/dashboard      Dashboard stats + task lists         (protected)
-  GET    /api/tasks?projectId=xxx  Tasks for a project (paginated)      (member)
-  POST   /api/tasks                Create a task                        (admin)
-  PUT    /api/tasks/:id            Update task (admin: full / member: status only)
-  DELETE /api/tasks/:id            Delete a task                        (admin)
+  GET    /api/tasks/dashboard     Stats + overdue + recent           (protected)
+  GET    /api/tasks               List for project (paginated)       (member)
+  POST   /api/tasks               Create                             (admin)
+  PUT    /api/tasks/:id           Update (admin: all / member: status only)
+  DELETE /api/tasks/:id           Delete                             (admin)
 
-  List query params  : ?projectId=xxx&page=1&limit=50&status=todo&priority=high
-  List response      : { tasks, total, page, pages }
-  Create / Update body:
+  List query  : ?projectId=xxx&page=1&limit=50&status=todo&priority=high
+  List resp   : { tasks, total, page, pages }
+  Create/Update body:
     { title, description?, projectId, assignedTo?, priority,
       dueDate?, status?, attachmentUrl? }
 
@@ -164,7 +181,7 @@ ROLE-BASED ACCESS CONTROL
   Member : View projects they belong to,
            update status of tasks assigned to them only
 
-  Any request outside these permissions returns 403 Forbidden.
+  Unauthorized requests return 403 Forbidden.
 
 --------------------------------------------------------------------------------
 FOLDER STRUCTURE
@@ -173,44 +190,38 @@ FOLDER STRUCTURE
   /
   ├── server/
   │   ├── config/         DB connection (db.js)
-  │   ├── controllers/    Business logic (auth, project, task)
-  │   ├── middleware/     JWT auth guard (cookie + header), project role guard
-  │   ├── models/         Mongoose schemas (User, Project, Task)
-  │   ├── routes/         Express routers (auth, projects, tasks)
+  │   ├── controllers/    auth, project, task
+  │   ├── middleware/     JWT guard (cookie + header), project role guard
+  │   ├── models/         User, Project, Task (Mongoose)
+  │   ├── routes/         auth, projects, tasks
   │   ├── seed.js         Demo data seeder
-  │   └── server.js       App entry point (CORS, cookie-parser, routes)
+  │   └── server.js       Entry: CORS, cookie-parser, routes
   └── client/
       └── src/
-          ├── components/ Layout (responsive sidebar), TaskCard, StatCard, Skeleton
-          ├── context/    AuthContext — cookie-based session restore
-          ├── lib/        Axios instance (withCredentials, Bearer fallback)
+          ├── components/ Layout (responsive sidebar), TaskCard,
+          │               StatCard, Skeleton
+          ├── context/    AuthContext (cookie-based session)
+          ├── lib/        Axios (withCredentials + Bearer fallback)
           ├── pages/      Login, Signup, Dashboard, Projects,
           │               ProjectDetail (Kanban), NewTask
-          └── types/      TypeScript interfaces (User, Project, Task, Dashboard)
+          └── types/      User, Project, Task, DashboardData
 
 --------------------------------------------------------------------------------
 DEPLOYMENT
 --------------------------------------------------------------------------------
 
-Backend (Render):
-  1. New Web Service -> GitHub repo -> Root Directory: server
-  2. Build Command : npm install
-  3. Start Command : node server.js
-  4. Environment variables:
-       MONGO_URI   = mongodb+srv://...
-       JWT_SECRET  = your_secret
-       CLIENT_URL  = https://your-app.vercel.app
-       NODE_ENV    = production
+Backend on Render:
+  Root Directory : server
+  Build Command  : npm install
+  Start Command  : node server.js
+  Env vars       : MONGO_URI, JWT_SECRET, CLIENT_URL, NODE_ENV=production
 
-Frontend (Vercel):
-  1. Import GitHub repo -> Root Directory: client
-  2. Environment variable:
-       VITE_API_URL = https://your-backend.onrender.com/api
-  3. Deploy — Vercel auto-runs Vite build
+Frontend on Vercel:
+  Root Directory : client
+  Env var        : VITE_API_URL=https://your-backend.onrender.com/api
 
-Notes:
-  - NODE_ENV=production sets cookie SameSite=None + Secure, required for
-    cross-origin httpOnly cookies between Vercel and Render domains.
-  - Both services deploy from the same GitHub repo using different Root Directories.
+IMPORTANT: NODE_ENV=production enables SameSite=None + Secure on the auth
+cookie, which is required for cross-origin cookies between Vercel and Render.
+Both services deploy from the same GitHub repo using different Root Directories.
 
 ================================================================================
