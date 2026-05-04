@@ -9,34 +9,30 @@ import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
 import { TaskSkeleton } from '../components/Skeleton';
 
-const COLUMNS: { key: Task['status']; label: string; accent: string; dragBg: string }[] = [
-  { key: 'todo',        label: 'To Do',       accent: 'rgba(139,92,246,0.6)',  dragBg: 'rgba(139,92,246,0.08)' },
-  { key: 'in-progress', label: 'In Progress', accent: 'rgba(59,130,246,0.6)',  dragBg: 'rgba(59,130,246,0.08)'  },
-  { key: 'completed',   label: 'Completed',   accent: 'rgba(52,211,153,0.6)',  dragBg: 'rgba(52,211,153,0.08)'  },
+const COLUMNS: { key: Task['status']; label: string; accent: string; dragBg: string; dot: string }[] = [
+  { key: 'todo',        label: 'To Do',       accent: '#7c3aed', dragBg: 'rgba(124,58,237,0.05)', dot: '#7c3aed' },
+  { key: 'in-progress', label: 'In Progress', accent: '#2563eb', dragBg: 'rgba(37,99,235,0.05)',  dot: '#2563eb' },
+  { key: 'completed',   label: 'Completed',   accent: '#059669', dragBg: 'rgba(5,150,105,0.05)',  dot: '#059669' },
 ];
 
 const STATUS_LABELS: Record<Task['status'], string> = {
   'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed',
 };
 
-const inputStyle: React.CSSProperties = {
-  background: 'rgba(88,28,135,0.3)',
-  border: '1px solid rgba(139,92,246,0.35)',
-  color: 'white',
-};
+const fieldStyle: React.CSSProperties = { background: '#f9f7ff', border: '1.5px solid #ddd6fe', color: '#1e1038' };
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const [project, setProject] = useState<Project | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [taskPage, setTaskPage] = useState(1);
-  const [taskPages, setTaskPages] = useState(1);
+  const [project, setProject]       = useState<Project | null>(null);
+  const [tasks, setTasks]           = useState<Task[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [taskPage, setTaskPage]     = useState(1);
+  const [taskPages, setTaskPages]   = useState(1);
   const [showAddMember, setShowAddMember] = useState(false);
-  const [memberEmail, setMemberEmail] = useState('');
-  const [memberRole, setMemberRole] = useState<'admin' | 'member'>('member');
-  const [addingMember, setAddingMember] = useState(false);
+  const [memberEmail, setMemberEmail]     = useState('');
+  const [memberRole, setMemberRole]       = useState<'admin' | 'member'>('member');
+  const [addingMember, setAddingMember]   = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const myRole = project?.members.find(m => m.user._id === user?._id)?.role;
@@ -60,7 +56,6 @@ export default function ProjectDetailPage() {
   }, [id, taskPage]);
 
   useEffect(() => { load(); }, [load]);
-
   useEffect(() => {
     pollRef.current = setInterval(() => load(true), 30_000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
@@ -98,10 +93,7 @@ export default function ProjectDetailPage() {
       try {
         await api.put(`/tasks/${draggableId}`, { status: dstCol });
         toast.success(`Moved to ${STATUS_LABELS[dstCol]}`);
-      } catch {
-        toast.error('Failed to move task');
-        load();
-      }
+      } catch { toast.error('Failed to move task'); load(); }
     }
   };
 
@@ -142,7 +134,7 @@ export default function ProjectDetailPage() {
 
   if (loading) return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="h-7 rounded w-48 animate-pulse" style={{ background: 'rgba(139,92,246,0.2)' }} />
+      <div className="h-7 rounded-xl w-48 animate-pulse" style={{ background: '#ede9fe' }} />
       <div className="grid grid-cols-3 gap-4">
         {Array(3).fill(0).map((_, i) => (
           <div key={i} className="space-y-3">{Array(2).fill(0).map((_, j) => <TaskSkeleton key={j} />)}</div>
@@ -151,34 +143,34 @@ export default function ProjectDetailPage() {
     </div>
   );
 
-  if (!project) return <div className="p-8 text-purple-400">Project not found</div>;
+  if (!project) return <div className="p-8 text-sm" style={{ color: '#a78bfa' }}>Project not found</div>;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
+
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">{project.name}</h1>
-          {project.description && <p className="text-purple-400 text-sm mt-1">{project.description}</p>}
+          <h1 className="text-2xl font-black" style={{ color: '#1e1038' }}>{project.name}</h1>
+          {project.description && <p className="text-sm mt-1" style={{ color: '#a78bfa' }}>{project.description}</p>}
         </div>
         {isAdmin && (
-          <Link
-            to={`/projects/${id}/tasks/new`}
-            className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:scale-105"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 15px rgba(124,58,237,0.4)' }}
-          >
-            <Plus size={16} /> New Task
+          <Link to={`/projects/${id}/tasks/new`}
+            className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold transition-all hover:scale-[1.03] shrink-0"
+            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 14px rgba(124,58,237,0.35)', borderRadius: '50px' }}>
+            <Plus size={15} /> New Task
           </Link>
         )}
       </div>
 
       {/* Members */}
-      <div className="rounded-2xl p-5 mb-6" style={{ background: 'rgba(20,8,46,0.8)', border: '1px solid rgba(139,92,246,0.2)' }}>
+      <div className="rounded-2xl p-5 mb-6" style={{ background: '#ffffff', border: '1.5px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-white">Team Members</h2>
+          <h2 className="font-bold" style={{ color: '#1e1038' }}>Team Members</h2>
           {isAdmin && (
             <button onClick={() => setShowAddMember(s => !s)}
-              className="flex items-center gap-1.5 text-sm text-purple-400 hover:text-purple-200 font-medium transition-colors">
+              className="flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-purple-900"
+              style={{ color: '#7c3aed' }}>
               <UserPlus size={15} /> Add Member
             </button>
           )}
@@ -186,20 +178,11 @@ export default function ProjectDetailPage() {
 
         {showAddMember && (
           <form onSubmit={handleAddMember} className="flex flex-col sm:flex-row gap-2 mb-4">
-            <input
-              value={memberEmail}
-              onChange={e => setMemberEmail(e.target.value)}
-              type="email"
+            <input value={memberEmail} onChange={e => setMemberEmail(e.target.value)} type="email"
               placeholder="member@example.com"
-              className="flex-1 px-3 py-2.5 rounded-xl text-sm placeholder-purple-600 outline-none"
-              style={inputStyle}
-            />
-            <select
-              value={memberRole}
-              onChange={e => setMemberRole(e.target.value as 'admin' | 'member')}
-              className="px-3 py-2.5 rounded-xl text-sm outline-none"
-              style={inputStyle}
-            >
+              className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none" style={fieldStyle} />
+            <select value={memberRole} onChange={e => setMemberRole(e.target.value as 'admin' | 'member')}
+              className="px-3 py-2.5 rounded-xl text-sm outline-none" style={fieldStyle}>
               <option value="member">Member</option>
               <option value="admin">Admin</option>
             </select>
@@ -213,19 +196,21 @@ export default function ProjectDetailPage() {
 
         <div className="flex flex-wrap gap-3">
           {project.members.map(m => (
-            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(88,28,135,0.2)', border: '1px solid rgba(139,92,246,0.2)' }}>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
+            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: '#f9f7ff', border: '1.5px solid #ede9fe' }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
                 {m.user.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-medium text-white flex items-center gap-1">
+                <p className="text-sm font-semibold flex items-center gap-1" style={{ color: '#1e1038' }}>
                   {m.user.name}
-                  {m.role === 'admin' && <Crown size={11} className="text-yellow-400" />}
+                  {m.role === 'admin' && <Crown size={11} className="text-yellow-500" />}
                 </p>
-                <p className="text-xs text-purple-400">{m.user.email}</p>
+                <p className="text-xs" style={{ color: '#a78bfa' }}>{m.user.email}</p>
               </div>
               {isAdmin && m.user._id !== user?._id && m.user._id !== project.createdBy._id && (
-                <button onClick={() => handleRemoveMember(m.user._id, m.user.name)} className="ml-1 text-purple-600 hover:text-red-400 transition-colors">
+                <button onClick={() => handleRemoveMember(m.user._id, m.user.name)}
+                  className="ml-1 transition-colors hover:text-red-500" style={{ color: '#c4b5fd' }}>
                   <Trash2 size={13} />
                 </button>
               )}
@@ -235,92 +220,79 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Drag hint */}
-      <p className="text-xs text-purple-600 mb-3 flex items-center gap-1">
+      <p className="text-xs mb-3 flex items-center gap-1" style={{ color: '#c4b5fd' }}>
         <GripVertical size={13} /> Drag tasks between columns to update status
       </p>
 
-      {/* Kanban — horizontal scroll on mobile */}
+      {/* Kanban */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="overflow-x-auto pb-2 -mx-1">
-        <div className="grid grid-cols-3 gap-4 min-w-[700px] px-1">
-          {COLUMNS.map(col => {
-            const colTasks = tasks.filter(t => t.status === col.key);
-            return (
-              <div key={col.key} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(20,8,46,0.8)', border: '1px solid rgba(139,92,246,0.2)' }}>
-                {/* Column header with accent top border */}
-                <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(139,92,246,0.15)', borderTop: `3px solid ${col.accent}` }}>
-                  <h3 className="font-semibold text-white text-sm">{col.label}</h3>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold text-white" style={{ background: col.accent }}>
-                    {colTasks.length}
-                  </span>
-                </div>
-
-                <Droppable droppableId={col.key}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="p-3 min-h-50 transition-colors"
-                      style={{ background: snapshot.isDraggingOver ? col.dragBg : 'transparent' }}
-                    >
-                      {colTasks.length === 0 && !snapshot.isDraggingOver && (
-                        <p className="text-xs text-purple-700 text-center py-8">No tasks</p>
-                      )}
-                      {colTasks.map((t, index) => (
-                        <Draggable key={t._id} draggableId={t._id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={`mb-3 transition-all ${snapshot.isDragging ? 'rotate-1 scale-105' : ''}`}
-                              style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(0 10px 30px rgba(124,58,237,0.5))' : undefined }}
-                            >
-                              <div className="relative group">
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-purple-700 hover:text-purple-400"
-                                >
-                                  <GripVertical size={14} />
-                                </div>
-                                <TaskCard
-                                  task={t}
-                                  onStatusChange={handleStatusChange}
-                                  isAdmin={isAdmin}
-                                  onDelete={isAdmin ? handleDeleteTask : undefined}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
+          <div className="grid grid-cols-3 gap-4 min-w-[700px] px-1">
+            {COLUMNS.map(col => {
+              const colTasks = tasks.filter(t => t.status === col.key);
+              return (
+                <div key={col.key} className="rounded-2xl overflow-hidden"
+                  style={{ background: '#ffffff', border: '1.5px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}>
+                  <div className="px-4 py-3 flex items-center justify-between"
+                    style={{ borderBottom: '1px solid #f0ebff', borderTop: `3px solid ${col.accent}` }}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ background: col.dot }} />
+                      <h3 className="font-bold text-sm" style={{ color: '#1e1038' }}>{col.label}</h3>
                     </div>
-                  )}
-                </Droppable>
-              </div>
-            );
-          })}
+                    <span className="text-xs px-2 py-0.5 rounded-full font-bold text-white" style={{ background: col.accent }}>
+                      {colTasks.length}
+                    </span>
+                  </div>
+
+                  <Droppable droppableId={col.key}>
+                    {(provided, snapshot) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps}
+                        className="p-3 min-h-50 transition-colors"
+                        style={{ background: snapshot.isDraggingOver ? col.dragBg : 'transparent' }}>
+                        {colTasks.length === 0 && !snapshot.isDraggingOver && (
+                          <p className="text-xs text-center py-8" style={{ color: '#ddd6fe' }}>No tasks</p>
+                        )}
+                        {colTasks.map((t, index) => (
+                          <Draggable key={t._id} draggableId={t._id} index={index}>
+                            {(provided, snapshot) => (
+                              <div ref={provided.innerRef} {...provided.draggableProps}
+                                className={`mb-3 transition-all ${snapshot.isDragging ? 'rotate-1 scale-105' : ''}`}
+                                style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(0 8px 24px rgba(124,58,237,0.25))' : undefined }}>
+                                <div className="relative group">
+                                  <div {...provided.dragHandleProps}
+                                    className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+                                    style={{ color: '#ddd6fe' }}>
+                                    <GripVertical size={14} />
+                                  </div>
+                                  <TaskCard task={t} onStatusChange={handleStatusChange} isAdmin={isAdmin}
+                                    onDelete={isAdmin ? handleDeleteTask : undefined} />
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        </div> {/* end overflow-x-auto */}
       </DragDropContext>
 
       {taskPages > 1 && (
         <div className="flex items-center justify-center gap-3 mt-6">
-          <button
-            onClick={() => setTaskPage(p => Math.max(1, p - 1))}
-            disabled={taskPage === 1}
-            className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-semibold text-purple-300 disabled:opacity-40 transition-all hover:text-white"
-            style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(88,28,135,0.2)' }}
-          >
+          <button onClick={() => setTaskPage(p => Math.max(1, p - 1))} disabled={taskPage === 1}
+            className="flex items-center gap-1 px-4 py-2 text-sm font-semibold transition-all disabled:opacity-40"
+            style={{ background: '#ffffff', border: '1.5px solid #ddd6fe', color: '#7c3aed', borderRadius: '50px' }}>
             <ChevronLeft size={14} /> Prev
           </button>
-          <span className="text-sm text-purple-400">Page {taskPage} of {taskPages}</span>
-          <button
-            onClick={() => setTaskPage(p => Math.min(taskPages, p + 1))}
-            disabled={taskPage === taskPages}
-            className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-semibold text-purple-300 disabled:opacity-40 transition-all hover:text-white"
-            style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(88,28,135,0.2)' }}
-          >
+          <span className="text-sm font-medium" style={{ color: '#a78bfa' }}>Page {taskPage} of {taskPages}</span>
+          <button onClick={() => setTaskPage(p => Math.min(taskPages, p + 1))} disabled={taskPage === taskPages}
+            className="flex items-center gap-1 px-4 py-2 text-sm font-semibold transition-all disabled:opacity-40"
+            style={{ background: '#ffffff', border: '1.5px solid #ddd6fe', color: '#7c3aed', borderRadius: '50px' }}>
             Next <ChevronRight size={14} />
           </button>
         </div>

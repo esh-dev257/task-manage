@@ -2,30 +2,24 @@
 
 @layer base {
   body {
-    background-color: #080114;
-    color: white;
+    background-color: #f5f3ff;
+    color: #1e1038;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
   }
 
   * { box-sizing: border-box; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.5); border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
-
-  /* Select / option */
-  option { background-color: #1a0535; color: white; }
-
-  /* Prevent horizontal overflow on mobile */
   html, body { overflow-x: hidden; }
 
-  /* Smooth focus rings */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+
+  option { background-color: #ffffff; color: #1e1038; }
+
   input:focus, textarea:focus, select:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(139,92,246,0.35);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
   }
 }

@@ -6,11 +6,9 @@ import api from '../lib/api';
 import type { Project } from '../types';
 import { useAuth } from '../context/AuthContext';
 
-const inputStyle: React.CSSProperties = {
-  background: 'rgba(88,28,135,0.3)',
-  border: '1px solid rgba(139,92,246,0.35)',
-  color: 'white',
-};
+const fieldCls = 'w-full px-4 py-3 rounded-xl text-sm outline-none transition-all';
+const fieldStyle: React.CSSProperties = { background: '#f9f7ff', border: '1.5px solid #ddd6fe', color: '#1e1038' };
+const label = 'block text-xs font-bold mb-1.5 uppercase tracking-wide';
 
 export default function NewTaskPage() {
   const { id } = useParams<{ id: string }>();
@@ -50,7 +48,7 @@ export default function NewTaskPage() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await api.post('/tasks', { ...form, projectId: id, assignedTo: form.assignedTo || undefined, dueDate: form.dueDate || undefined });
+      await api.post('/tasks', { ...form, projectId: id, assignedTo: form.assignedTo || undefined, dueDate: form.dueDate || undefined, attachmentUrl: form.attachmentUrl || undefined });
       toast.success('Task created!');
       navigate(`/projects/${id}`);
     } catch (err: any) {
@@ -60,50 +58,43 @@ export default function NewTaskPage() {
 
   const f = (field: keyof typeof form, value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
+  const errBorder = (key: string) => errors[key] ? '1.5px solid #ef4444' : '1.5px solid #ddd6fe';
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-2xl">
-      <Link to={`/projects/${id}`} className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-200 mb-6 transition-colors">
+      <Link to={`/projects/${id}`} className="flex items-center gap-2 text-sm font-semibold mb-6 transition-colors hover:text-purple-900" style={{ color: '#7c3aed' }}>
         <ArrowLeft size={16} /> Back to project
       </Link>
 
-      <h1 className="text-2xl font-bold text-white mb-6">New Task</h1>
+      <h1 className="text-2xl font-black mb-6" style={{ color: '#1e1038' }}>New Task</h1>
 
-      <div className="rounded-2xl p-6 space-y-5" style={{ background: 'rgba(20,8,46,0.8)', border: '1px solid rgba(139,92,246,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+      <div className="rounded-2xl p-6 space-y-5" style={{ background: '#ffffff', border: '1.5px solid #ede9fe', boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
+
         <div>
-          <label className="block text-sm text-purple-300 mb-1.5">Title *</label>
-          <input
-            value={form.title}
-            onChange={e => f('title', e.target.value)}
-            placeholder="Task title"
-            className="w-full px-4 py-3 rounded-xl text-sm placeholder-purple-600 outline-none"
-            style={{ ...inputStyle, borderColor: errors.title ? '#f87171' : 'rgba(139,92,246,0.35)' }}
-          />
-          {errors.title && <p className="text-xs text-red-400 mt-1">{errors.title}</p>}
+          <label className={label} style={{ color: '#7c3aed' }}>Title *</label>
+          <input value={form.title} onChange={e => f('title', e.target.value)} placeholder="Task title"
+            className={fieldCls} style={{ ...fieldStyle, border: errBorder('title') }} />
+          {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
         </div>
 
         <div>
-          <label className="block text-sm text-purple-300 mb-1.5">Description</label>
-          <textarea
-            value={form.description}
-            onChange={e => f('description', e.target.value)}
-            placeholder="Describe the task…"
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl text-sm placeholder-purple-600 outline-none resize-none"
-            style={inputStyle}
-          />
+          <label className={label} style={{ color: '#7c3aed' }}>Description</label>
+          <textarea value={form.description} onChange={e => f('description', e.target.value)}
+            placeholder="Describe the task…" rows={3}
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all" style={fieldStyle} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-purple-300 mb-1.5">Assign To</label>
-            <select value={form.assignedTo} onChange={e => f('assignedTo', e.target.value)} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle}>
+            <label className={label} style={{ color: '#7c3aed' }}>Assign To</label>
+            <select value={form.assignedTo} onChange={e => f('assignedTo', e.target.value)} className={fieldCls} style={fieldStyle}>
               <option value="">Unassigned</option>
               {project?.members.map(m => <option key={m.user._id} value={m.user._id}>{m.user.name} ({m.role})</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm text-purple-300 mb-1.5">Priority</label>
-            <select value={form.priority} onChange={e => f('priority', e.target.value)} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle}>
+            <label className={label} style={{ color: '#7c3aed' }}>Priority</label>
+            <select value={form.priority} onChange={e => f('priority', e.target.value)} className={fieldCls} style={fieldStyle}>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -111,47 +102,40 @@ export default function NewTaskPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-purple-300 mb-1.5">Status</label>
-            <select value={form.status} onChange={e => f('status', e.target.value)} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle}>
+            <label className={label} style={{ color: '#7c3aed' }}>Status</label>
+            <select value={form.status} onChange={e => f('status', e.target.value)} className={fieldCls} style={fieldStyle}>
               <option value="todo">To Do</option>
               <option value="in-progress">In Progress</option>
               <option value="completed">Completed</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm text-purple-300 mb-1.5">Due Date</label>
-            <input
-              type="date"
-              value={form.dueDate}
-              onChange={e => f('dueDate', e.target.value)}
+            <label className={label} style={{ color: '#7c3aed' }}>Due Date</label>
+            <input type="date" value={form.dueDate} onChange={e => f('dueDate', e.target.value)}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-              style={{ ...inputStyle, borderColor: errors.dueDate ? '#f87171' : 'rgba(139,92,246,0.35)', colorScheme: 'dark' }}
-            />
-            {errors.dueDate && <p className="text-xs text-red-400 mt-1">{errors.dueDate}</p>}
+              className={fieldCls} style={{ ...fieldStyle, border: errBorder('dueDate'), colorScheme: 'light' }} />
+            {errors.dueDate && <p className="text-xs text-red-500 mt-1">{errors.dueDate}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm text-purple-300 mb-1.5">Attachment URL</label>
-          <input
-            value={form.attachmentUrl}
-            onChange={e => f('attachmentUrl', e.target.value)}
-            placeholder="https://drive.google.com/…"
-            type="url"
-            className="w-full px-4 py-3 rounded-xl text-sm placeholder-purple-600 outline-none"
-            style={inputStyle}
-          />
+          <label className={label} style={{ color: '#7c3aed' }}>Attachment URL</label>
+          <input value={form.attachmentUrl} onChange={e => f('attachmentUrl', e.target.value)}
+            placeholder="https://drive.google.com/…" type="url"
+            className={fieldCls} style={fieldStyle} />
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Link to={`/projects/${id}`} className="flex-1 py-2.5 text-center rounded-xl text-sm font-semibold text-purple-300 hover:text-white transition-colors" style={{ border: '1px solid rgba(139,92,246,0.3)' }}>
+          <Link to={`/projects/${id}`}
+            className="flex-1 py-2.5 text-center rounded-xl text-sm font-semibold transition-colors"
+            style={{ border: '1.5px solid #ddd6fe', color: '#7c3aed', background: '#f5f3ff' }}>
             Cancel
           </Link>
-          <button type="button" onClick={handleSubmit} disabled={loading} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 15px rgba(124,58,237,0.4)' }}>
+          <button type="button" onClick={handleSubmit} disabled={loading}
+            className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 16px rgba(124,58,237,0.35)' }}>
             {loading ? 'Creating…' : 'Create Task'}
           </button>
         </div>

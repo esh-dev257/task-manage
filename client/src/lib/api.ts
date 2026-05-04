@@ -18,7 +18,7 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Don't redirect if already on an auth page — avoids reload loop
+      // Don't redirect if already on an auth page -avoids reload loop
       const path = window.location.pathname;
       if (!path.startsWith('/login') && !path.startsWith('/signup')) {
         window.location.href = '/login';

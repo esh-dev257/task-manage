@@ -24,7 +24,7 @@ TECH STACK
   Frontend   : React 18, TypeScript, Vite, Tailwind CSS v4
   Backend    : Node.js, Express.js
   Database   : MongoDB (Mongoose ODM)
-  Auth       : JWT — httpOnly cookie (primary) + localStorage Bearer token fallback
+  Auth       : JWT -httpOnly cookie (primary) + localStorage Bearer token fallback
   DnD        : @hello-pangea/dnd (drag-and-drop Kanban)
   Deployment : Vercel (frontend) + Render (backend)
 
@@ -50,7 +50,7 @@ FEATURES
     - Paginated task list (50 per page) per project
     - Filter tasks by status and priority
     - File attachment URL per task (shown as paperclip link in task card)
-    - Overdue detection — tasks past due date highlighted in red
+    - Overdue detection -tasks past due date highlighted in red
 
   Dashboard
     - Stats cards: Total / Completed / In Progress / To Do / Overdue
@@ -63,7 +63,7 @@ FEATURES
     - No manual page refresh needed to see teammates' changes
 
   UI / UX
-    - Fully responsive — mobile, tablet, desktop
+    - Fully responsive -mobile, tablet, desktop
     - Mobile hamburger sidebar with smooth slide-in overlay animation
     - Dark deep-purple glassmorphism theme throughout
     - Auth pages: split-panel layout with large blob background decorations,
@@ -138,8 +138,8 @@ API DOCUMENTATION
 --------------------------------------------------------------------------------
 
 AUTH ENDPOINTS
-  POST   /api/auth/signup    Register — sets httpOnly cookie         (public)
-  POST   /api/auth/login     Login — sets httpOnly cookie            (public)
+  POST   /api/auth/signup    Register -sets httpOnly cookie         (public)
+  POST   /api/auth/login     Login -sets httpOnly cookie            (public)
   GET    /api/auth/me        Restore session from cookie             (protected)
   POST   /api/auth/logout    Clear auth cookie                       (protected)
 

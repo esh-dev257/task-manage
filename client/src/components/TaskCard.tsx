@@ -2,15 +2,15 @@ import { Calendar, User, AlertCircle, Trash2, Paperclip } from 'lucide-react';
 import type { Task } from '../types';
 
 const priorityStyles = {
-  high:   { background: 'rgba(239,68,68,0.15)',  color: '#fca5a5' },
-  medium: { background: 'rgba(251,191,36,0.15)', color: '#fde68a' },
-  low:    { background: 'rgba(52,211,153,0.15)', color: '#6ee7b7' },
+  high:   { background: 'rgba(239,68,68,0.1)',  color: '#dc2626' },
+  medium: { background: 'rgba(245,158,11,0.1)', color: '#d97706' },
+  low:    { background: 'rgba(34,197,94,0.1)',  color: '#16a34a' },
 };
 
 const statusStyles = {
-  'todo':        { background: 'rgba(139,92,246,0.15)', color: '#c4b5fd' },
-  'in-progress': { background: 'rgba(59,130,246,0.15)', color: '#93c5fd' },
-  'completed':   { background: 'rgba(52,211,153,0.15)', color: '#6ee7b7' },
+  'todo':        { background: 'rgba(124,58,237,0.1)',  color: '#7c3aed' },
+  'in-progress': { background: 'rgba(59,130,246,0.1)',  color: '#2563eb' },
+  'completed':   { background: 'rgba(16,185,129,0.1)',  color: '#059669' },
 };
 
 const statusLabels = { 'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed' };
@@ -26,16 +26,19 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   return (
-    <div className="rounded-xl p-4 space-y-3 transition-all hover:-translate-y-0.5" style={{ background: 'rgba(30,10,60,0.8)', border: '1px solid rgba(139,92,246,0.2)', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+    <div className="rounded-xl p-4 space-y-3 transition-all hover:-translate-y-0.5" style={{ background: '#ffffff', border: '1px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 6px 20px rgba(124,58,237,0.12)')}
+      onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 2px 12px rgba(124,58,237,0.06)')}
+    >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-semibold text-white text-sm leading-snug">{task.title}</h3>
-        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0" style={priorityStyles[task.priority]}>
+        <h3 className="font-semibold text-sm leading-snug" style={{ color: '#1e1038' }}>{task.title}</h3>
+        <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0" style={priorityStyles[task.priority]}>
           {task.priority}
         </span>
       </div>
 
       {task.description && (
-        <p className="text-xs text-purple-400 line-clamp-2">{task.description}</p>
+        <p className="text-xs line-clamp-2" style={{ color: '#a78bfa' }}>{task.description}</p>
       )}
 
       {task.attachmentUrl && (
@@ -43,7 +46,8 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
           href={task.attachmentUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-200 transition-colors truncate"
+          className="flex items-center gap-1 text-xs transition-colors truncate"
+          style={{ color: '#7c3aed' }}
           onClick={e => e.stopPropagation()}
         >
           <Paperclip size={11} />
@@ -70,21 +74,21 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
         )}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-purple-400 pt-1" style={{ borderTop: '1px solid rgba(139,92,246,0.1)' }}>
+      <div className="flex items-center justify-between text-xs pt-1" style={{ borderTop: '1px solid #f0ebff', color: '#a78bfa' }}>
         <div className="flex items-center gap-1">
           <User size={11} />
           <span>{task.assignedTo?.name ?? 'Unassigned'}</span>
         </div>
         <div className="flex items-center gap-2">
           {task.dueDate && (
-            <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-400' : ''}`}>
+            <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-500' : ''}`}>
               {isOverdue && <AlertCircle size={11} />}
               <Calendar size={11} />
               <span>{new Date(task.dueDate).toLocaleDateString()}</span>
             </div>
           )}
           {isAdmin && onDelete && (
-            <button onClick={() => onDelete(task._id)} className="text-purple-600 hover:text-red-400 transition-colors">
+            <button onClick={() => onDelete(task._id)} className="transition-colors hover:text-red-500" style={{ color: '#c4b5fd' }}>
               <Trash2 size={12} />
             </button>
           )}

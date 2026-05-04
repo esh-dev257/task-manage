@@ -18,7 +18,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Try to restore session — works via httpOnly cookie or localStorage token fallback
     const savedUser = localStorage.getItem('user');
     if (savedUser) setUser(JSON.parse(savedUser));
 
@@ -40,16 +39,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (t: string, u: User) => {
     setToken(t);
     setUser(u);
-    localStorage.setItem('token', t);     // fallback for non-cookie environments
+    localStorage.setItem('token', t);
     localStorage.setItem('user', JSON.stringify(u));
   };
 
-  const logout = async () => {
-    try { await api.post('/auth/logout'); } catch { /* ignore */ }
+  // Clear state synchronously so ProtectedRoute redirects instantly,
+  // then fire the cookie-clear request in the background.
+  const logout = () => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    api.post('/auth/logout').catch(() => {});
   };
 
   return (
