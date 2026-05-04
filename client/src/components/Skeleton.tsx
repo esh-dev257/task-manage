@@ -1,5 +1,5 @@
-const shimmer: React.CSSProperties = { background: '#ede9fe', borderRadius: '8px' };
-const card: React.CSSProperties = { background: '#ffffff', border: '1px solid #ede9fe', borderRadius: '16px' };
+const shimmer: React.CSSProperties = { background: '#d4d4d4', borderRadius: '8px' };
+const card: React.CSSProperties = { background: '#ffffff', border: '2px solid #0a0a0a', borderRadius: '16px' };
 
 export function CardSkeleton() {
   return (
@@ -29,10 +29,10 @@ export function TaskSkeleton() {
 
 export function StatSkeleton() {
   return (
-    <div className="rounded-2xl p-5 animate-pulse" style={{ background: '#ede9fe' }}>
-      <div className="w-9 h-9 rounded-xl mb-3" style={{ background: '#ddd6fe' }} />
-      <div className="h-7 w-12 rounded mb-1" style={{ background: '#ddd6fe' }} />
-      <div className="h-3 w-20 rounded" style={{ background: '#ddd6fe' }} />
+    <div className="rounded-2xl p-5 animate-pulse" style={{ background: '#e0e0e0', border: '2px solid #0a0a0a' }}>
+      <div className="w-9 h-9 rounded-xl mb-3" style={{ background: '#c8c8c8' }} />
+      <div className="h-7 w-12 rounded mb-1" style={{ background: '#c8c8c8' }} />
+      <div className="h-3 w-20 rounded" style={{ background: '#c8c8c8' }} />
     </div>
   );
 }

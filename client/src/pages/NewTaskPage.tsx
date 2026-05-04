@@ -7,8 +7,8 @@ import type { Project } from '../types';
 import { useAuth } from '../context/AuthContext';
 
 const fieldCls = 'w-full px-4 py-3 rounded-xl text-sm outline-none transition-all';
-const fieldStyle: React.CSSProperties = { background: '#f9f7ff', border: '1.5px solid #ddd6fe', color: '#1e1038' };
-const label = 'block text-xs font-bold mb-1.5 uppercase tracking-wide';
+const fieldStyle: React.CSSProperties = { background: '#f0f0f0', border: '2px solid #0a0a0a', color: '#0a0a0a' };
+const label = 'block text-xs font-black mb-1.5 uppercase tracking-wide';
 
 export default function NewTaskPage() {
   const { id } = useParams<{ id: string }>();
@@ -57,28 +57,29 @@ export default function NewTaskPage() {
   };
 
   const f = (field: keyof typeof form, value: string) => setForm(prev => ({ ...prev, [field]: value }));
-
-  const errBorder = (key: string) => errors[key] ? '1.5px solid #ef4444' : '1.5px solid #ddd6fe';
+  const errBorder = (key: string) => errors[key] ? '2px solid #FF3737' : '2px solid #0a0a0a';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-2xl">
-      <Link to={`/projects/${id}`} className="flex items-center gap-2 text-sm font-semibold mb-6 transition-colors hover:text-purple-900" style={{ color: '#7c3aed' }}>
+      <Link to={`/projects/${id}`}
+        className="flex items-center gap-2 text-sm font-black mb-6 transition-opacity hover:opacity-60"
+        style={{ color: '#1A3BFF' }}>
         <ArrowLeft size={16} /> Back to project
       </Link>
 
-      <h1 className="text-2xl font-black mb-6" style={{ color: '#1e1038' }}>New Task</h1>
+      <h1 className="text-2xl font-black mb-6" style={{ color: '#0a0a0a' }}>New Task</h1>
 
-      <div className="rounded-2xl p-6 space-y-5" style={{ background: '#ffffff', border: '1.5px solid #ede9fe', boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
+      <div className="rounded-2xl p-6 space-y-5" style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
 
         <div>
-          <label className={label} style={{ color: '#7c3aed' }}>Title *</label>
+          <label className={label} style={{ color: '#0a0a0a' }}>Title *</label>
           <input value={form.title} onChange={e => f('title', e.target.value)} placeholder="Task title"
             className={fieldCls} style={{ ...fieldStyle, border: errBorder('title') }} />
           {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
         </div>
 
         <div>
-          <label className={label} style={{ color: '#7c3aed' }}>Description</label>
+          <label className={label} style={{ color: '#0a0a0a' }}>Description</label>
           <textarea value={form.description} onChange={e => f('description', e.target.value)}
             placeholder="Describe the task…" rows={3}
             className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all" style={fieldStyle} />
@@ -86,14 +87,14 @@ export default function NewTaskPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={label} style={{ color: '#7c3aed' }}>Assign To</label>
+            <label className={label} style={{ color: '#0a0a0a' }}>Assign To</label>
             <select value={form.assignedTo} onChange={e => f('assignedTo', e.target.value)} className={fieldCls} style={fieldStyle}>
               <option value="">Unassigned</option>
               {project?.members.map(m => <option key={m.user._id} value={m.user._id}>{m.user.name} ({m.role})</option>)}
             </select>
           </div>
           <div>
-            <label className={label} style={{ color: '#7c3aed' }}>Priority</label>
+            <label className={label} style={{ color: '#0a0a0a' }}>Priority</label>
             <select value={form.priority} onChange={e => f('priority', e.target.value)} className={fieldCls} style={fieldStyle}>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -104,7 +105,7 @@ export default function NewTaskPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={label} style={{ color: '#7c3aed' }}>Status</label>
+            <label className={label} style={{ color: '#0a0a0a' }}>Status</label>
             <select value={form.status} onChange={e => f('status', e.target.value)} className={fieldCls} style={fieldStyle}>
               <option value="todo">To Do</option>
               <option value="in-progress">In Progress</option>
@@ -112,7 +113,7 @@ export default function NewTaskPage() {
             </select>
           </div>
           <div>
-            <label className={label} style={{ color: '#7c3aed' }}>Due Date</label>
+            <label className={label} style={{ color: '#0a0a0a' }}>Due Date</label>
             <input type="date" value={form.dueDate} onChange={e => f('dueDate', e.target.value)}
               min={new Date().toISOString().split('T')[0]}
               className={fieldCls} style={{ ...fieldStyle, border: errBorder('dueDate'), colorScheme: 'light' }} />
@@ -121,7 +122,7 @@ export default function NewTaskPage() {
         </div>
 
         <div>
-          <label className={label} style={{ color: '#7c3aed' }}>Attachment URL</label>
+          <label className={label} style={{ color: '#0a0a0a' }}>Attachment URL</label>
           <input value={form.attachmentUrl} onChange={e => f('attachmentUrl', e.target.value)}
             placeholder="https://drive.google.com/…" type="url"
             className={fieldCls} style={fieldStyle} />
@@ -129,13 +130,13 @@ export default function NewTaskPage() {
 
         <div className="flex gap-3 pt-2">
           <Link to={`/projects/${id}`}
-            className="flex-1 py-2.5 text-center rounded-xl text-sm font-semibold transition-colors"
-            style={{ border: '1.5px solid #ddd6fe', color: '#7c3aed', background: '#f5f3ff' }}>
+            className="flex-1 py-2.5 text-center rounded-xl text-sm font-black transition-colors"
+            style={{ border: '2px solid #0a0a0a', color: '#0a0a0a', background: '#f0f0f0' }}>
             Cancel
           </Link>
           <button type="button" onClick={handleSubmit} disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 16px rgba(124,58,237,0.35)' }}>
+            className="flex-1 py-2.5 rounded-xl text-sm font-black disabled:opacity-60"
+            style={{ background: '#C8FF00', color: '#0a0a0a', border: '2px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a' }}>
             {loading ? 'Creating…' : 'Create Task'}
           </button>
         </div>

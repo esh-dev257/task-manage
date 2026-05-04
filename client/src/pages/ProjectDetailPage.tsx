@@ -10,16 +10,16 @@ import TaskCard from '../components/TaskCard';
 import { TaskSkeleton } from '../components/Skeleton';
 
 const COLUMNS: { key: Task['status']; label: string; accent: string; dragBg: string; dot: string }[] = [
-  { key: 'todo',        label: 'To Do',       accent: '#7c3aed', dragBg: 'rgba(124,58,237,0.05)', dot: '#7c3aed' },
-  { key: 'in-progress', label: 'In Progress', accent: '#2563eb', dragBg: 'rgba(37,99,235,0.05)',  dot: '#2563eb' },
-  { key: 'completed',   label: 'Completed',   accent: '#059669', dragBg: 'rgba(5,150,105,0.05)',  dot: '#059669' },
+  { key: 'todo',        label: 'To Do',       accent: '#1A3BFF', dragBg: 'rgba(26,59,255,0.05)', dot: '#1A3BFF' },
+  { key: 'in-progress', label: 'In Progress', accent: '#C8FF00', dragBg: 'rgba(200,255,0,0.08)', dot: '#C8FF00' },
+  { key: 'completed',   label: 'Completed',   accent: '#0a0a0a', dragBg: 'rgba(0,0,0,0.03)',     dot: '#0a0a0a' },
 ];
 
 const STATUS_LABELS: Record<Task['status'], string> = {
   'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed',
 };
 
-const fieldStyle: React.CSSProperties = { background: '#f9f7ff', border: '1.5px solid #ddd6fe', color: '#1e1038' };
+const fieldStyle: React.CSSProperties = { background: '#f0f0f0', border: '2px solid #0a0a0a', color: '#0a0a0a' };
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -134,7 +134,7 @@ export default function ProjectDetailPage() {
 
   if (loading) return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="h-7 rounded-xl w-48 animate-pulse" style={{ background: '#ede9fe' }} />
+      <div className="h-7 rounded-xl w-48 animate-pulse" style={{ background: '#d4d4d4' }} />
       <div className="grid grid-cols-3 gap-4">
         {Array(3).fill(0).map((_, i) => (
           <div key={i} className="space-y-3">{Array(2).fill(0).map((_, j) => <TaskSkeleton key={j} />)}</div>
@@ -143,7 +143,7 @@ export default function ProjectDetailPage() {
     </div>
   );
 
-  if (!project) return <div className="p-8 text-sm" style={{ color: '#a78bfa' }}>Project not found</div>;
+  if (!project) return <div className="p-8 text-sm font-bold" style={{ color: '#888888' }}>Project not found</div>;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -151,26 +151,26 @@ export default function ProjectDetailPage() {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black" style={{ color: '#1e1038' }}>{project.name}</h1>
-          {project.description && <p className="text-sm mt-1" style={{ color: '#a78bfa' }}>{project.description}</p>}
+          <h1 className="text-2xl font-black" style={{ color: '#0a0a0a' }}>{project.name}</h1>
+          {project.description && <p className="text-sm mt-1" style={{ color: '#666666' }}>{project.description}</p>}
         </div>
         {isAdmin && (
           <Link to={`/projects/${id}/tasks/new`}
-            className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold transition-all hover:scale-[1.03] shrink-0"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 14px rgba(124,58,237,0.35)', borderRadius: '50px' }}>
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-black transition-all hover:scale-[1.03] shrink-0"
+            style={{ background: '#C8FF00', color: '#0a0a0a', border: '2px solid #0a0a0a', borderRadius: '50px', boxShadow: '3px 3px 0 #0a0a0a' }}>
             <Plus size={15} /> New Task
           </Link>
         )}
       </div>
 
       {/* Members */}
-      <div className="rounded-2xl p-5 mb-6" style={{ background: '#ffffff', border: '1.5px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}>
+      <div className="rounded-2xl p-5 mb-6" style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold" style={{ color: '#1e1038' }}>Team Members</h2>
+          <h2 className="font-black" style={{ color: '#0a0a0a' }}>Team Members</h2>
           {isAdmin && (
             <button onClick={() => setShowAddMember(s => !s)}
-              className="flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-purple-900"
-              style={{ color: '#7c3aed' }}>
+              className="flex items-center gap-1.5 text-sm font-black transition-opacity hover:opacity-60"
+              style={{ color: '#1A3BFF' }}>
               <UserPlus size={15} /> Add Member
             </button>
           )}
@@ -187,8 +187,8 @@ export default function ProjectDetailPage() {
               <option value="admin">Admin</option>
             </select>
             <button type="submit" disabled={addingMember}
-              className="px-4 py-2 text-white rounded-xl text-sm font-bold disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
+              className="px-4 py-2 rounded-xl text-sm font-black disabled:opacity-60"
+              style={{ background: '#C8FF00', color: '#0a0a0a', border: '2px solid #0a0a0a', boxShadow: '2px 2px 0 #0a0a0a' }}>
               {addingMember ? '…' : 'Add'}
             </button>
           </form>
@@ -196,21 +196,22 @@ export default function ProjectDetailPage() {
 
         <div className="flex flex-wrap gap-3">
           {project.members.map(m => (
-            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: '#f9f7ff', border: '1.5px solid #ede9fe' }}>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
+            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-xl"
+              style={{ background: '#f0f0f0', border: '1.5px solid #d0d0d0' }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs"
+                style={{ background: '#1A3BFF', color: '#ffffff' }}>
                 {m.user.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-semibold flex items-center gap-1" style={{ color: '#1e1038' }}>
+                <p className="text-sm font-bold flex items-center gap-1" style={{ color: '#0a0a0a' }}>
                   {m.user.name}
                   {m.role === 'admin' && <Crown size={11} className="text-yellow-500" />}
                 </p>
-                <p className="text-xs" style={{ color: '#a78bfa' }}>{m.user.email}</p>
+                <p className="text-xs" style={{ color: '#888888' }}>{m.user.email}</p>
               </div>
               {isAdmin && m.user._id !== user?._id && m.user._id !== project.createdBy._id && (
                 <button onClick={() => handleRemoveMember(m.user._id, m.user.name)}
-                  className="ml-1 transition-colors hover:text-red-500" style={{ color: '#c4b5fd' }}>
+                  className="ml-1 transition-colors hover:text-red-500" style={{ color: '#aaaaaa' }}>
                   <Trash2 size={13} />
                 </button>
               )}
@@ -220,7 +221,7 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Drag hint */}
-      <p className="text-xs mb-3 flex items-center gap-1" style={{ color: '#c4b5fd' }}>
+      <p className="text-xs mb-3 flex items-center gap-1 font-medium" style={{ color: '#aaaaaa' }}>
         <GripVertical size={13} /> Drag tasks between columns to update status
       </p>
 
@@ -230,16 +231,17 @@ export default function ProjectDetailPage() {
           <div className="grid grid-cols-3 gap-4 min-w-[700px] px-1">
             {COLUMNS.map(col => {
               const colTasks = tasks.filter(t => t.status === col.key);
+              const headerText = col.accent === '#C8FF00' ? '#0a0a0a' : '#ffffff';
               return (
                 <div key={col.key} className="rounded-2xl overflow-hidden"
-                  style={{ background: '#ffffff', border: '1.5px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}>
+                  style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
                   <div className="px-4 py-3 flex items-center justify-between"
-                    style={{ borderBottom: '1px solid #f0ebff', borderTop: `3px solid ${col.accent}` }}>
+                    style={{ background: col.accent, borderBottom: '2px solid #0a0a0a' }}>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ background: col.dot }} />
-                      <h3 className="font-bold text-sm" style={{ color: '#1e1038' }}>{col.label}</h3>
+                      <h3 className="font-black text-sm" style={{ color: headerText }}>{col.label}</h3>
                     </div>
-                    <span className="text-xs px-2 py-0.5 rounded-full font-bold text-white" style={{ background: col.accent }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-black"
+                      style={{ background: 'rgba(0,0,0,0.15)', color: headerText }}>
                       {colTasks.length}
                     </span>
                   </div>
@@ -250,18 +252,18 @@ export default function ProjectDetailPage() {
                         className="p-3 min-h-50 transition-colors"
                         style={{ background: snapshot.isDraggingOver ? col.dragBg : 'transparent' }}>
                         {colTasks.length === 0 && !snapshot.isDraggingOver && (
-                          <p className="text-xs text-center py-8" style={{ color: '#ddd6fe' }}>No tasks</p>
+                          <p className="text-xs text-center py-8 font-medium" style={{ color: '#cccccc' }}>No tasks</p>
                         )}
                         {colTasks.map((t, index) => (
                           <Draggable key={t._id} draggableId={t._id} index={index}>
                             {(provided, snapshot) => (
                               <div ref={provided.innerRef} {...provided.draggableProps}
                                 className={`mb-3 transition-all ${snapshot.isDragging ? 'rotate-1 scale-105' : ''}`}
-                                style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(0 8px 24px rgba(124,58,237,0.25))' : undefined }}>
+                                style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(4px 4px 0 rgba(0,0,0,0.3))' : undefined }}>
                                 <div className="relative group">
                                   <div {...provided.dragHandleProps}
                                     className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-                                    style={{ color: '#ddd6fe' }}>
+                                    style={{ color: '#aaaaaa' }}>
                                     <GripVertical size={14} />
                                   </div>
                                   <TaskCard task={t} onStatusChange={handleStatusChange} isAdmin={isAdmin}
@@ -285,14 +287,14 @@ export default function ProjectDetailPage() {
       {taskPages > 1 && (
         <div className="flex items-center justify-center gap-3 mt-6">
           <button onClick={() => setTaskPage(p => Math.max(1, p - 1))} disabled={taskPage === 1}
-            className="flex items-center gap-1 px-4 py-2 text-sm font-semibold transition-all disabled:opacity-40"
-            style={{ background: '#ffffff', border: '1.5px solid #ddd6fe', color: '#7c3aed', borderRadius: '50px' }}>
+            className="flex items-center gap-1 px-4 py-2 text-sm font-black transition-all disabled:opacity-40"
+            style={{ background: '#ffffff', border: '2px solid #0a0a0a', color: '#0a0a0a', borderRadius: '50px', boxShadow: '2px 2px 0 #0a0a0a' }}>
             <ChevronLeft size={14} /> Prev
           </button>
-          <span className="text-sm font-medium" style={{ color: '#a78bfa' }}>Page {taskPage} of {taskPages}</span>
+          <span className="text-sm font-bold" style={{ color: '#666666' }}>Page {taskPage} of {taskPages}</span>
           <button onClick={() => setTaskPage(p => Math.min(taskPages, p + 1))} disabled={taskPage === taskPages}
-            className="flex items-center gap-1 px-4 py-2 text-sm font-semibold transition-all disabled:opacity-40"
-            style={{ background: '#ffffff', border: '1.5px solid #ddd6fe', color: '#7c3aed', borderRadius: '50px' }}>
+            className="flex items-center gap-1 px-4 py-2 text-sm font-black transition-all disabled:opacity-40"
+            style={{ background: '#ffffff', border: '2px solid #0a0a0a', color: '#0a0a0a', borderRadius: '50px', boxShadow: '2px 2px 0 #0a0a0a' }}>
             Next <ChevronRight size={14} />
           </button>
         </div>
