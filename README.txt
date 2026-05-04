@@ -4,7 +4,7 @@
 
 A full-stack team task management application with role-based access control,
 drag-and-drop Kanban boards, paginated lists, auto-refresh polling, file
-attachments, and a fully responsive dark purple glassmorphism UI.
+attachments, and a fully responsive light-theme UI.
 
 --------------------------------------------------------------------------------
 LIVE DEMO
@@ -24,7 +24,7 @@ TECH STACK
   Frontend   : React 18, TypeScript, Vite, Tailwind CSS v4
   Backend    : Node.js, Express.js
   Database   : MongoDB (Mongoose ODM)
-  Auth       : JWT -httpOnly cookie (primary) + localStorage Bearer token fallback
+  Auth       : JWT - httpOnly cookie (primary) + localStorage Bearer token fallback
   DnD        : @hello-pangea/dnd (drag-and-drop Kanban)
   Deployment : Vercel (frontend) + Render (backend)
 
@@ -34,9 +34,13 @@ FEATURES
 
   Authentication
     - Signup / Login with bcrypt password hashing
-    - JWT stored in httpOnly cookie (XSS-safe); localStorage Bearer token fallback
-    - Session restore on page reload via /auth/me (cookie-based)
-    - Logout clears server cookie + localStorage
+    - JWT stored in httpOnly cookie (XSS-safe); primary auth mechanism
+    - localStorage used as Bearer token fallback for non-browser API clients
+    - Session restored on page reload via /auth/me (cookie-based)
+    - Logout clears server cookie AND localStorage synchronously
+      (state cleared immediately to prevent post-logout UI flash)
+    - 401 interceptor skips redirect when already on /login or /signup
+      (prevents infinite reload loop on auth pages)
     - Password show/hide toggle; demo quick-fill buttons on login page
 
   Projects
@@ -46,11 +50,11 @@ FEATURES
 
   Tasks
     - Create, update, delete tasks (Admin only for create/delete)
-    - Drag-and-drop Kanban board (To Do → In Progress → Completed)
+    - Drag-and-drop Kanban board (To Do -> In Progress -> Completed)
     - Paginated task list (50 per page) per project
     - Filter tasks by status and priority
     - File attachment URL per task (shown as paperclip link in task card)
-    - Overdue detection -tasks past due date highlighted in red
+    - Overdue detection - tasks past due date highlighted in red
 
   Dashboard
     - Stats cards: Total / Completed / In Progress / To Do / Overdue
@@ -63,33 +67,38 @@ FEATURES
     - No manual page refresh needed to see teammates' changes
 
   UI / UX
-    - Fully responsive -mobile, tablet, desktop
+    - Fully responsive - mobile, tablet, desktop
     - Mobile hamburger sidebar with smooth slide-in overlay animation
-    - Dark deep-purple glassmorphism theme throughout
-    - Auth pages: split-panel layout with large blob background decorations,
-      pill-shaped inputs, icon-prefixed fields, eye toggle, vibrant
-      purple→fuchsia gradient CTA button (inspired by modern finance app UI)
-    - Horizontal Kanban scroll on mobile
-    - Toast notifications on every action
+    - Light theme throughout (white cards, soft lavender backgrounds)
+    - Auth pages: split-panel layout with gradient left panel and light right
+      panel; pill-shaped inputs, icon-prefixed fields, eye toggle, vibrant
+      purple->fuchsia gradient CTA button
+    - Horizontal Kanban scroll on mobile (min-width guard)
+    - Toast feedback on every action (react-hot-toast)
     - Loading skeletons for smooth perceived performance
 
 --------------------------------------------------------------------------------
-UI THEME REFERENCE
+UI THEME
 --------------------------------------------------------------------------------
 
   Colour palette:
-    Background  #08011a  (deep purple-black)
-    Primary     #7c3aed  (violet-600)
-    Accent      #d946ef  (fuchsia-500)
-    Card        rgba(255,255,255,0.06) frosted glass
-    Text        white / purple-300 / purple-500
+    Page background  #f5f3ff  (soft lavender)
+    Card background  #ffffff  (white)
+    Border           #ede9fe  (lavender-100)
+    Input background #f9f7ff
+    Input border     #ddd6fe
+    Dark text        #1e1038  (deep purple)
+    Primary accent   #7c3aed  (violet-600)
+    Muted text       #a78bfa  (violet-400)
+    Subtle text      #c4b5fd  (violet-300)
 
   Design elements:
     - Pill-shaped inputs (border-radius: 50px) with icon prefix
-    - Gradient CTA button: violet → purple → fuchsia, pill-shaped
-    - Large blurred radial-gradient blobs as background decoration
-    - Glassmorphism cards (backdrop-filter: blur)
-    - Accent border glow on hover / active states
+    - Gradient CTA button: linear-gradient(135deg, #7c3aed, #a855f7), pill-shaped
+    - Auth left panel: deep purple gradient (decorative branding)
+    - Kanban columns: white cards with coloured top-border accent per status
+    - Drag highlight: very subtle tinted background per column
+    - Large blurred radial-gradient blobs on auth page backgrounds
 
 --------------------------------------------------------------------------------
 LOCAL SETUP
@@ -138,13 +147,13 @@ API DOCUMENTATION
 --------------------------------------------------------------------------------
 
 AUTH ENDPOINTS
-  POST   /api/auth/signup    Register -sets httpOnly cookie         (public)
-  POST   /api/auth/login     Login -sets httpOnly cookie            (public)
+  POST   /api/auth/signup    Register - sets httpOnly cookie         (public)
+  POST   /api/auth/login     Login - sets httpOnly cookie            (public)
   GET    /api/auth/me        Restore session from cookie             (protected)
   POST   /api/auth/logout    Clear auth cookie                       (protected)
 
-  Body:  { name?, email, password }
-  Resp:  { token, user }
+  Body  : { name?, email, password }
+  Resp  : { token, user }
   Cookie: "token" httpOnly; SameSite=None + Secure in production
 
 PROJECT ENDPOINTS
@@ -198,10 +207,9 @@ FOLDER STRUCTURE
   │   └── server.js       Entry: CORS, cookie-parser, routes
   └── client/
       └── src/
-          ├── components/ Layout (responsive sidebar), TaskCard,
-          │               StatCard, Skeleton
-          ├── context/    AuthContext (cookie-based session)
-          ├── lib/        Axios (withCredentials + Bearer fallback)
+          ├── components/ Layout (responsive sidebar), TaskCard, Skeleton
+          ├── context/    AuthContext (cookie-based session + localStorage sync)
+          ├── lib/        Axios (withCredentials + Bearer fallback, 401 guard)
           ├── pages/      Login, Signup, Dashboard, Projects,
           │               ProjectDetail (Kanban), NewTask
           └── types/      User, Project, Task, DashboardData
@@ -221,7 +229,7 @@ Frontend on Vercel:
   Env var        : VITE_API_URL=https://your-backend.onrender.com/api
 
 IMPORTANT: NODE_ENV=production enables SameSite=None + Secure on the auth
-cookie, which is required for cross-origin cookies between Vercel and Render.
+cookie, required for cross-origin cookies between Vercel and Render.
 Both services deploy from the same GitHub repo using different Root Directories.
 
 ================================================================================
