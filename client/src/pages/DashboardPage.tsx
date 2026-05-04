@@ -66,10 +66,10 @@ export default function DashboardPage() {
   const filteredTasks = data?.recentTasks.filter(t => filter === 'all' || t.status === filter) ?? [];
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 lg:space-y-6">
 
       {/* Welcome Banner */}
-      <div className="relative rounded-2xl overflow-hidden p-7" style={{ background: 'linear-gradient(135deg, #2d1065 0%, #4a1a7a 50%, #6b21a8 100%)', boxShadow: '0 8px 32px rgba(124,58,237,0.3)' }}>
+      <div className="relative rounded-2xl overflow-hidden p-5 sm:p-7" style={{ background: 'linear-gradient(135deg, #2d1065 0%, #4a1a7a 50%, #6b21a8 100%)', boxShadow: '0 8px 32px rgba(124,58,237,0.3)' }}>
         {/* Decorative */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full -translate-y-1/2 translate-x-1/4" style={{ background: 'rgba(255,255,255,0.05)' }} />
         <div className="absolute bottom-0 right-16 w-32 h-32 rounded-full translate-y-1/2" style={{ background: 'rgba(255,255,255,0.07)' }} />
@@ -92,7 +92,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
         {loading
           ? Array(5).fill(0).map((_, i) => <StatSkeleton key={i} />)
           : STAT_CARDS.map(c => (

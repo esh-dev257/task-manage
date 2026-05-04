@@ -61,7 +61,7 @@ export default function NewTaskPage() {
   const f = (field: keyof typeof form, value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl">
       <Link to={`/projects/${id}`} className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-200 mb-6 transition-colors">
         <ArrowLeft size={16} /> Back to project
       </Link>

@@ -141,7 +141,7 @@ export default function ProjectDetailPage() {
   };
 
   if (loading) return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="h-7 rounded w-48 animate-pulse" style={{ background: 'rgba(139,92,246,0.2)' }} />
       <div className="grid grid-cols-3 gap-4">
         {Array(3).fill(0).map((_, i) => (
@@ -154,9 +154,9 @@ export default function ProjectDetailPage() {
   if (!project) return <div className="p-8 text-purple-400">Project not found</div>;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">{project.name}</h1>
           {project.description && <p className="text-purple-400 text-sm mt-1">{project.description}</p>}
@@ -185,7 +185,7 @@ export default function ProjectDetailPage() {
         </div>
 
         {showAddMember && (
-          <form onSubmit={handleAddMember} className="flex gap-2 mb-4">
+          <form onSubmit={handleAddMember} className="flex flex-col sm:flex-row gap-2 mb-4">
             <input
               value={memberEmail}
               onChange={e => setMemberEmail(e.target.value)}
@@ -239,9 +239,10 @@ export default function ProjectDetailPage() {
         <GripVertical size={13} /> Drag tasks between columns to update status
       </p>
 
-      {/* Kanban */}
+      {/* Kanban — horizontal scroll on mobile */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="overflow-x-auto pb-2 -mx-1">
+        <div className="grid grid-cols-3 gap-4 min-w-[700px] px-1">
           {COLUMNS.map(col => {
             const colTasks = tasks.filter(t => t.status === col.key);
             return (
@@ -300,6 +301,7 @@ export default function ProjectDetailPage() {
             );
           })}
         </div>
+        </div> {/* end overflow-x-auto */}
       </DragDropContext>
 
       {taskPages > 1 && (
