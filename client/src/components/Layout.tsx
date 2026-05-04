@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, FolderKanban, LogOut, CheckSquare, Bell, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, LogOut, CheckSquare, Menu, X } from 'lucide-react';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -118,14 +118,8 @@ export default function Layout() {
               <p className="text-[11px] hidden sm:block" style={{ color: '#c4b5fd' }}>{today}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors relative hover:bg-purple-50" style={{ border: '1px solid #ede9fe', color: '#a78bfa' }}>
-              <Bell size={15} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-pink-500 rounded-full" />
-            </button>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 12px rgba(124,58,237,0.35)' }}>
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 4px 12px rgba(124,58,237,0.35)' }}>
+            {user?.name?.charAt(0).toUpperCase()}
           </div>
         </header>
 
