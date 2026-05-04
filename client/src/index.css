@@ -2,8 +2,8 @@
 
 @layer base {
   body {
-    background-color: #f0f0f0;
-    color: #0a0a0a;
+    background-color: #F8FAFC;
+    color: #0F172A;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -13,13 +13,14 @@
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #c8ff00; border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-  option { background-color: #ffffff; color: #0a0a0a; }
+  option { background-color: #ffffff; color: #0F172A; }
 
   input:focus, textarea:focus, select:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(200,255,0,0.45);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    border-color: #2563EB !important;
   }
 }

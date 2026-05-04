@@ -7,24 +7,24 @@ import { useAuth } from '../context/AuthContext';
 import { StatSkeleton, TaskSkeleton } from '../components/Skeleton';
 import toast from 'react-hot-toast';
 
-const STATUS_META: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  'todo':        { label: 'To Do',       color: '#0a0a0a', bg: '#ffffff',  dot: '#0a0a0a' },
-  'in-progress': { label: 'In Progress', color: '#ffffff', bg: '#1A3BFF',  dot: '#1A3BFF' },
-  'completed':   { label: 'Completed',   color: '#0a0a0a', bg: '#C8FF00',  dot: '#0a0a0a' },
+const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
+  'todo':        { label: 'To Do',       color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0', dot: '#94A3B8' },
+  'in-progress': { label: 'In Progress', color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE', dot: '#2563EB' },
+  'completed':   { label: 'Done',        color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0', dot: '#16A34A' },
 };
 
-const PRIORITY_META: Record<string, { color: string; bg: string }> = {
-  high:   { color: '#ffffff', bg: '#FF3737' },
-  medium: { color: '#ffffff', bg: '#FF8C00' },
-  low:    { color: '#ffffff', bg: '#0a0a0a' },
+const PRIORITY_META: Record<string, { color: string; bg: string; border: string }> = {
+  high:   { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },
+  medium: { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
+  low:    { color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0' },
 };
 
 const STAT_CARDS = [
-  { key: 'total',      label: 'Total Tasks',  bg: '#1A3BFF', textColor: '#ffffff', icon: <BarChart3 size={18} /> },
-  { key: 'completed',  label: 'Completed',    bg: '#C8FF00', textColor: '#0a0a0a', icon: <CheckCircle2 size={18} /> },
-  { key: 'inProgress', label: 'In Progress',  bg: '#0a0a0a', textColor: '#ffffff', icon: <Clock size={18} /> },
-  { key: 'todo',       label: 'To Do',        bg: '#ffffff', textColor: '#0a0a0a', icon: <ListTodo size={18} /> },
-  { key: 'overdue',    label: 'Overdue',      bg: '#FF3737', textColor: '#ffffff', icon: <AlertTriangle size={18} /> },
+  { key: 'total',      label: 'Total Tasks', color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE', icon: <BarChart3 size={16} /> },
+  { key: 'completed',  label: 'Completed',   color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0', icon: <CheckCircle2 size={16} /> },
+  { key: 'inProgress', label: 'In Progress', color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', icon: <Clock size={16} /> },
+  { key: 'todo',       label: 'To Do',       color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0', icon: <ListTodo size={16} /> },
+  { key: 'overdue',    label: 'Overdue',     color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', icon: <AlertTriangle size={16} /> },
 ] as const;
 
 const FILTERS = [
@@ -67,81 +67,44 @@ export default function DashboardPage() {
     } catch { toast.error('Failed to update status'); }
   };
 
-  const filteredTasks  = data?.recentTasks.filter(t => filter === 'all' || t.status === filter) ?? [];
-  const completionPct  = data ? Math.round((data.stats.completed / Math.max(data.stats.total, 1)) * 100) : 0;
-  const hour           = new Date().getHours();
-  const greeting       = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const filteredTasks = data?.recentTasks.filter(t => filter === 'all' || t.status === filter) ?? [];
+  const completionPct = data ? Math.round((data.stats.completed / Math.max(data.stats.total, 1)) * 100) : 0;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-5 lg:space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
 
-      {/* Hero Banner — flat blue */}
-      <div className="relative rounded-3xl overflow-hidden" style={{ background: '#1A3BFF', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
-        <div className="absolute top-4 right-8 w-28 h-28 rounded-full" style={{ border: '2px solid rgba(255,255,255,0.15)' }} />
-        <div className="absolute top-8 right-12 w-16 h-16 rounded-full" style={{ border: '2px solid rgba(255,255,255,0.1)' }} />
-        <div className="absolute -bottom-6 left-1/3 w-24 h-24 rounded-full" style={{ background: '#C8FF00', opacity: 0.15 }} />
-
-        <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
-          <div className="flex-1">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] mb-2" style={{ color: '#C8FF00' }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">
-              {greeting}, {user?.name?.split(' ')[0]}!
-            </h2>
-            <p className="text-white/65 text-sm mb-5">
-              {loading ? 'Loading your workspace…' : `You've completed ${completionPct}% of your tasks — keep it up!`}
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link to="/projects"
-                className="inline-flex items-center gap-2 text-sm font-black px-5 py-2.5 transition-all hover:scale-[1.03]"
-                style={{ background: '#C8FF00', color: '#0a0a0a', borderRadius: '50px', border: '2px solid rgba(0,0,0,0.2)' }}>
-                View Projects <ArrowRight size={14} />
-              </Link>
-              {!loading && data && data.stats.overdue > 0 && (
-                <span className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2.5"
-                  style={{ background: '#FF3737', color: '#ffffff', borderRadius: '50px', border: '2px solid rgba(0,0,0,0.2)' }}>
-                  <AlertTriangle size={13} /> {data.stats.overdue} overdue
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Completion ring */}
-          {!loading && data && (
-            <div className="hidden sm:flex flex-col items-center gap-2 shrink-0">
-              <div className="relative w-24 h-24">
-                <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="8" />
-                  <circle cx="48" cy="48" r="38" fill="none" stroke="#C8FF00" strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 38}`}
-                    strokeDashoffset={`${2 * Math.PI * 38 * (1 - completionPct / 100)}`}
-                    style={{ transition: 'stroke-dashoffset 0.8s ease' }} />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xl font-black text-white">{completionPct}%</span>
-                </div>
-              </div>
-              <p className="text-[11px] font-bold" style={{ color: '#C8FF00' }}>Complete</p>
-            </div>
-          )}
+      {/* Greeting row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: '#0F172A' }}>
+            {greeting}, {user?.name?.split(' ')[0]}
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: '#94A3B8' }}>
+            {loading ? 'Loading…' : `${completionPct}% of your tasks are complete`}
+          </p>
         </div>
+        <Link to="/projects"
+          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg transition-all hover:opacity-80 self-start sm:self-auto"
+          style={{ background: '#0F172A', color: '#ffffff' }}>
+          View Projects <ArrowRight size={14} />
+        </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {loading
           ? Array(5).fill(0).map((_, i) => <StatSkeleton key={i} />)
           : STAT_CARDS.map(c => (
-            <div key={c.key} className="rounded-2xl p-4 lg:p-5 cursor-default transition-all hover:-translate-y-0.5"
-              style={{ background: c.bg, border: '2px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a' }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: 'rgba(0,0,0,0.12)', color: c.textColor }}>
+            <div key={c.key} className="rounded-xl p-4 transition-all hover:-translate-y-px cursor-default"
+              style={{ background: '#ffffff', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
+                style={{ background: c.bg, color: c.color }}>
                 {c.icon}
               </div>
-              <p className="text-2xl lg:text-3xl font-black" style={{ color: c.textColor }}>{data?.stats[c.key] ?? 0}</p>
-              <p className="text-xs mt-0.5 truncate font-bold" style={{ color: c.textColor, opacity: 0.7 }}>{c.label}</p>
+              <p className="text-2xl font-bold" style={{ color: '#0F172A' }}>{data?.stats[c.key] ?? 0}</p>
+              <p className="text-xs mt-0.5 font-medium" style={{ color: '#94A3B8' }}>{c.label}</p>
             </div>
           ))
         }
@@ -149,27 +112,30 @@ export default function DashboardPage() {
 
       {/* Overdue */}
       {!loading && (data?.overdueTasks.length ?? 0) > 0 && (
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#FFF0F0', border: '2px solid #FF3737', boxShadow: '3px 3px 0 #FF3737' }}>
-          <div className="px-5 py-3 flex items-center gap-2" style={{ background: '#FF3737' }}>
-            <AlertTriangle size={15} className="text-white" />
-            <span className="text-sm font-black text-white">{data!.overdueTasks.length} Overdue Task{data!.overdueTasks.length > 1 ? 's' : ''}</span>
-            <span className="text-xs text-white/70 ml-1">— action required</span>
+        <div className="rounded-xl overflow-hidden" style={{ background: '#ffffff', border: '1px solid #FECACA' }}>
+          <div className="px-5 py-3 flex items-center gap-2" style={{ background: '#FEF2F2', borderBottom: '1px solid #FECACA' }}>
+            <AlertTriangle size={14} style={{ color: '#DC2626' }} />
+            <span className="text-sm font-semibold" style={{ color: '#DC2626' }}>
+              {data!.overdueTasks.length} overdue task{data!.overdueTasks.length > 1 ? 's' : ''}
+            </span>
           </div>
           <div>
             {data!.overdueTasks.map((t, i) => (
-              <div key={t._id} className="px-5 py-3.5 flex items-center gap-4"
-                style={{ borderBottom: i < data!.overdueTasks.length - 1 ? '1px solid #FFD0D0' : 'none' }}>
-                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#FF3737' }} />
+              <div key={t._id} className="px-5 py-3 flex items-center gap-4"
+                style={{ borderBottom: i < data!.overdueTasks.length - 1 ? '1px solid #FEF2F2' : 'none' }}>
+                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#DC2626' }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate" style={{ color: '#0a0a0a' }}>{t.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#FF3737' }}>{t.project.name} · due {new Date(t.dueDate!).toLocaleDateString()}</p>
+                  <p className="text-sm font-medium truncate" style={{ color: '#0F172A' }}>{t.title}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: '#DC2626' }}>
+                    {t.project.name} · due {new Date(t.dueDate!).toLocaleDateString()}
+                  </p>
                 </div>
                 <select value={t.status} onChange={e => handleStatusChange(t._id, e.target.value as Task['status'])}
-                  className="text-xs font-black px-3 py-1.5 outline-none cursor-pointer"
-                  style={{ background: '#ffffff', color: '#0a0a0a', border: '2px solid #0a0a0a', borderRadius: '50px' }}>
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg outline-none cursor-pointer"
+                  style={{ background: '#F8FAFC', color: '#374151', border: '1px solid #E2E8F0' }}>
                   <option value="todo">To Do</option>
                   <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
+                  <option value="completed">Done</option>
                 </select>
               </div>
             ))}
@@ -177,21 +143,21 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* My Tasks */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
+      {/* Tasks */}
+      <div className="rounded-xl overflow-hidden" style={{ background: '#ffffff', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
         <div className="px-5 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap"
-          style={{ borderBottom: '2px solid #0a0a0a', background: '#ffffff' }}>
+          style={{ borderBottom: '1px solid #F1F5F9' }}>
           <div className="flex items-center gap-2">
-            <TrendingUp size={16} style={{ color: '#1A3BFF' }} />
-            <h3 className="font-black text-sm" style={{ color: '#0a0a0a' }}>My Recent Tasks</h3>
+            <TrendingUp size={15} style={{ color: '#2563EB' }} />
+            <h3 className="font-semibold text-sm" style={{ color: '#0F172A' }}>Recent Tasks</h3>
           </div>
           <div className="flex gap-1.5 flex-wrap">
             {FILTERS.map(f => (
               <button key={f.key} onClick={() => setFilter(f.key)}
-                className="text-xs px-3 py-1.5 font-black uppercase tracking-wide transition-all"
+                className="text-xs px-3 py-1.5 rounded-lg font-medium transition-all"
                 style={filter === f.key
-                  ? { background: '#C8FF00', color: '#0a0a0a', borderRadius: '50px', border: '2px solid #0a0a0a' }
-                  : { background: '#f0f0f0', color: '#666666', border: '2px solid #e0e0e0', borderRadius: '50px' }}>
+                  ? { background: '#0F172A', color: '#ffffff' }
+                  : { background: '#F8FAFC', color: '#64748B', border: '1px solid #E2E8F0' }}>
                 {f.label}
               </button>
             ))}
@@ -202,10 +168,10 @@ export default function DashboardPage() {
           <div className="p-5 space-y-3">{Array(4).fill(0).map((_, i) => <TaskSkeleton key={i} />)}</div>
         ) : filteredTasks.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#C8FF00', border: '2px solid #0a0a0a' }}>
-              <CheckCircle2 size={20} style={{ color: '#0a0a0a' }} />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#F1F5F9' }}>
+              <CheckCircle2 size={18} style={{ color: '#CBD5E1' }} />
             </div>
-            <p className="text-sm font-bold" style={{ color: '#888888' }}>No tasks found</p>
+            <p className="text-sm" style={{ color: '#94A3B8' }}>No tasks found</p>
           </div>
         ) : (
           <div>
@@ -215,28 +181,29 @@ export default function DashboardPage() {
               const pm = PRIORITY_META[t.priority];
               return (
                 <div key={t._id}
-                  className="px-5 sm:px-6 py-4 flex items-center gap-3 sm:gap-4 transition-all cursor-default"
-                  style={{ borderBottom: i < filteredTasks.length - 1 ? '1px solid #f0f0f0' : 'none' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#fafafa')}
+                  className="px-5 sm:px-6 py-3.5 flex items-center gap-3 sm:gap-4 transition-colors cursor-default"
+                  style={{ borderBottom: i < filteredTasks.length - 1 ? '1px solid #F8FAFC' : 'none' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: sm.dot }} />
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: sm.dot }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate" style={{ color: '#0a0a0a' }}>{t.title}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: '#888888' }}>{t.project.name}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: '#0F172A' }}>{t.title}</p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: '#94A3B8' }}>{t.project.name}</p>
                   </div>
-                  <span className="hidden sm:inline text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wide" style={pm}>
+                  <span className="hidden sm:inline text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
+                    style={{ color: pm.color, background: pm.bg, border: `1px solid ${pm.border}` }}>
                     {t.priority}
                   </span>
                   <select value={t.status} onChange={e => handleStatusChange(t._id, e.target.value as Task['status'])}
-                    className="text-[10px] font-black px-2.5 py-1.5 border-0 cursor-pointer outline-none shrink-0 rounded-full"
-                    style={{ color: sm.color, background: sm.bg, border: sm.bg === '#ffffff' ? '1.5px solid #0a0a0a' : 'none' }}>
+                    className="text-[10px] font-semibold px-2 py-1 rounded-full border-0 cursor-pointer outline-none shrink-0"
+                    style={{ color: sm.color, background: sm.bg, border: `1px solid ${sm.border}` }}>
                     <option value="todo">To Do</option>
                     <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="completed">Done</option>
                   </select>
                   {t.dueDate && (
-                    <span className={`hidden md:block text-xs font-medium shrink-0 ${isOverdue ? 'text-red-500' : ''}`}
-                      style={isOverdue ? {} : { color: '#aaaaaa' }}>
+                    <span className="hidden md:block text-xs shrink-0"
+                      style={{ color: isOverdue ? '#DC2626' : '#CBD5E1' }}>
                       {new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
                   )}

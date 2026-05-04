@@ -9,17 +9,22 @@ import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
 import { TaskSkeleton } from '../components/Skeleton';
 
-const COLUMNS: { key: Task['status']; label: string; accent: string; dragBg: string; dot: string }[] = [
-  { key: 'todo',        label: 'To Do',       accent: '#1A3BFF', dragBg: 'rgba(26,59,255,0.05)', dot: '#1A3BFF' },
-  { key: 'in-progress', label: 'In Progress', accent: '#C8FF00', dragBg: 'rgba(200,255,0,0.08)', dot: '#C8FF00' },
-  { key: 'completed',   label: 'Completed',   accent: '#0a0a0a', dragBg: 'rgba(0,0,0,0.03)',     dot: '#0a0a0a' },
+const COLUMNS: { key: Task['status']; label: string; accent: string; dot: string; dragBg: string }[] = [
+  { key: 'todo',        label: 'To Do',       accent: '#64748B', dot: '#94A3B8', dragBg: 'rgba(100,116,139,0.04)' },
+  { key: 'in-progress', label: 'In Progress', accent: '#2563EB', dot: '#2563EB', dragBg: 'rgba(37,99,235,0.04)'   },
+  { key: 'completed',   label: 'Done',        accent: '#16A34A', dot: '#16A34A', dragBg: 'rgba(22,163,74,0.04)'   },
 ];
 
 const STATUS_LABELS: Record<Task['status'], string> = {
-  'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed',
+  'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Done',
 };
 
-const fieldStyle: React.CSSProperties = { background: '#f0f0f0', border: '2px solid #0a0a0a', color: '#0a0a0a' };
+const inputStyle: React.CSSProperties = {
+  background: '#ffffff',
+  border: '1px solid #D1D5DB',
+  borderRadius: '8px',
+  color: '#0F172A',
+};
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -115,7 +120,7 @@ export default function ProjectDetailPage() {
       setProject(data);
       setMemberEmail('');
       setShowAddMember(false);
-      toast.success('Member added successfully');
+      toast.success('Member added');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to add member');
     } finally { setAddingMember(false); }
@@ -126,7 +131,7 @@ export default function ProjectDetailPage() {
     try {
       await api.delete(`/projects/${id}/members/${userId}`);
       setProject(prev => prev ? { ...prev, members: prev.members.filter(m => m.user._id !== userId) } : prev);
-      toast.success(`${name} removed from project`);
+      toast.success(`${name} removed`);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to remove member');
     }
@@ -134,7 +139,7 @@ export default function ProjectDetailPage() {
 
   if (loading) return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="h-7 rounded-xl w-48 animate-pulse" style={{ background: '#d4d4d4' }} />
+      <div className="h-6 rounded w-40 animate-pulse" style={{ background: '#F1F5F9' }} />
       <div className="grid grid-cols-3 gap-4">
         {Array(3).fill(0).map((_, i) => (
           <div key={i} className="space-y-3">{Array(2).fill(0).map((_, j) => <TaskSkeleton key={j} />)}</div>
@@ -143,35 +148,35 @@ export default function ProjectDetailPage() {
     </div>
   );
 
-  if (!project) return <div className="p-8 text-sm font-bold" style={{ color: '#888888' }}>Project not found</div>;
+  if (!project) return <div className="p-8 text-sm" style={{ color: '#94A3B8' }}>Project not found</div>;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
 
       {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black" style={{ color: '#0a0a0a' }}>{project.name}</h1>
-          {project.description && <p className="text-sm mt-1" style={{ color: '#666666' }}>{project.description}</p>}
+          <h1 className="text-xl font-bold" style={{ color: '#0F172A' }}>{project.name}</h1>
+          {project.description && <p className="text-sm mt-1" style={{ color: '#64748B' }}>{project.description}</p>}
         </div>
         {isAdmin && (
           <Link to={`/projects/${id}/tasks/new`}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-black transition-all hover:scale-[1.03] shrink-0"
-            style={{ background: '#C8FF00', color: '#0a0a0a', border: '2px solid #0a0a0a', borderRadius: '50px', boxShadow: '3px 3px 0 #0a0a0a' }}>
-            <Plus size={15} /> New Task
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all hover:opacity-90 shrink-0"
+            style={{ background: '#0F172A' }}>
+            <Plus size={14} /> New Task
           </Link>
         )}
       </div>
 
       {/* Members */}
-      <div className="rounded-2xl p-5 mb-6" style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
+      <div className="rounded-xl p-5 mb-5" style={{ background: '#ffffff', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-black" style={{ color: '#0a0a0a' }}>Team Members</h2>
+          <h2 className="text-sm font-semibold" style={{ color: '#0F172A' }}>Team Members</h2>
           {isAdmin && (
             <button onClick={() => setShowAddMember(s => !s)}
-              className="flex items-center gap-1.5 text-sm font-black transition-opacity hover:opacity-60"
-              style={{ color: '#1A3BFF' }}>
-              <UserPlus size={15} /> Add Member
+              className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-70"
+              style={{ color: '#2563EB' }}>
+              <UserPlus size={13} /> Add Member
             </button>
           )}
         </div>
@@ -180,39 +185,39 @@ export default function ProjectDetailPage() {
           <form onSubmit={handleAddMember} className="flex flex-col sm:flex-row gap-2 mb-4">
             <input value={memberEmail} onChange={e => setMemberEmail(e.target.value)} type="email"
               placeholder="member@example.com"
-              className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none" style={fieldStyle} />
+              className="flex-1 px-3 py-2 text-sm" style={inputStyle} />
             <select value={memberRole} onChange={e => setMemberRole(e.target.value as 'admin' | 'member')}
-              className="px-3 py-2.5 rounded-xl text-sm outline-none" style={fieldStyle}>
+              className="px-3 py-2 text-sm" style={inputStyle}>
               <option value="member">Member</option>
               <option value="admin">Admin</option>
             </select>
             <button type="submit" disabled={addingMember}
-              className="px-4 py-2 rounded-xl text-sm font-black disabled:opacity-60"
-              style={{ background: '#C8FF00', color: '#0a0a0a', border: '2px solid #0a0a0a', boxShadow: '2px 2px 0 #0a0a0a' }}>
+              className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-all hover:opacity-90 disabled:opacity-60"
+              style={{ background: '#0F172A' }}>
               {addingMember ? '…' : 'Add'}
             </button>
           </form>
         )}
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {project.members.map(m => (
-            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-xl"
-              style={{ background: '#f0f0f0', border: '1.5px solid #d0d0d0' }}>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs"
-                style={{ background: '#1A3BFF', color: '#ffffff' }}>
+            <div key={m.user._id} className="flex items-center gap-2 px-3 py-2 rounded-lg"
+              style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center font-semibold text-xs text-white shrink-0"
+                style={{ background: '#2563EB' }}>
                 {m.user.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-bold flex items-center gap-1" style={{ color: '#0a0a0a' }}>
+                <p className="text-xs font-medium flex items-center gap-1" style={{ color: '#0F172A' }}>
                   {m.user.name}
-                  {m.role === 'admin' && <Crown size={11} className="text-yellow-500" />}
+                  {m.role === 'admin' && <Crown size={10} className="text-amber-500" />}
                 </p>
-                <p className="text-xs" style={{ color: '#888888' }}>{m.user.email}</p>
+                <p className="text-[10px]" style={{ color: '#94A3B8' }}>{m.user.email}</p>
               </div>
               {isAdmin && m.user._id !== user?._id && m.user._id !== project.createdBy._id && (
                 <button onClick={() => handleRemoveMember(m.user._id, m.user.name)}
-                  className="ml-1 transition-colors hover:text-red-500" style={{ color: '#aaaaaa' }}>
-                  <Trash2 size={13} />
+                  className="ml-1 transition-colors hover:text-red-500" style={{ color: '#CBD5E1' }}>
+                  <Trash2 size={12} />
                 </button>
               )}
             </div>
@@ -221,8 +226,8 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Drag hint */}
-      <p className="text-xs mb-3 flex items-center gap-1 font-medium" style={{ color: '#aaaaaa' }}>
-        <GripVertical size={13} /> Drag tasks between columns to update status
+      <p className="text-xs mb-3 flex items-center gap-1" style={{ color: '#CBD5E1' }}>
+        <GripVertical size={12} /> Drag cards to change status
       </p>
 
       {/* Kanban */}
@@ -231,17 +236,18 @@ export default function ProjectDetailPage() {
           <div className="grid grid-cols-3 gap-4 min-w-[700px] px-1">
             {COLUMNS.map(col => {
               const colTasks = tasks.filter(t => t.status === col.key);
-              const headerText = col.accent === '#C8FF00' ? '#0a0a0a' : '#ffffff';
               return (
-                <div key={col.key} className="rounded-2xl overflow-hidden"
-                  style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}>
+                <div key={col.key} className="rounded-xl overflow-hidden flex flex-col"
+                  style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                  {/* Column header */}
                   <div className="px-4 py-3 flex items-center justify-between"
-                    style={{ background: col.accent, borderBottom: '2px solid #0a0a0a' }}>
+                    style={{ background: '#ffffff', borderBottom: '1px solid #E2E8F0', borderTop: `3px solid ${col.accent}` }}>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-black text-sm" style={{ color: headerText }}>{col.label}</h3>
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: col.dot }} />
+                      <h3 className="font-semibold text-xs" style={{ color: '#374151' }}>{col.label}</h3>
                     </div>
-                    <span className="text-xs px-2 py-0.5 rounded-full font-black"
-                      style={{ background: 'rgba(0,0,0,0.15)', color: headerText }}>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                      style={{ background: '#F1F5F9', color: '#64748B', border: '1px solid #E2E8F0' }}>
                       {colTasks.length}
                     </span>
                   </div>
@@ -249,22 +255,22 @@ export default function ProjectDetailPage() {
                   <Droppable droppableId={col.key}>
                     {(provided, snapshot) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}
-                        className="p-3 min-h-50 transition-colors"
+                        className="p-3 min-h-50 flex-1 transition-colors"
                         style={{ background: snapshot.isDraggingOver ? col.dragBg : 'transparent' }}>
                         {colTasks.length === 0 && !snapshot.isDraggingOver && (
-                          <p className="text-xs text-center py-8 font-medium" style={{ color: '#cccccc' }}>No tasks</p>
+                          <p className="text-xs text-center py-8" style={{ color: '#E2E8F0' }}>No tasks</p>
                         )}
                         {colTasks.map((t, index) => (
                           <Draggable key={t._id} draggableId={t._id} index={index}>
                             {(provided, snapshot) => (
                               <div ref={provided.innerRef} {...provided.draggableProps}
-                                className={`mb-3 transition-all ${snapshot.isDragging ? 'rotate-1 scale-105' : ''}`}
-                                style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(4px 4px 0 rgba(0,0,0,0.3))' : undefined }}>
+                                className={`mb-2.5 transition-all ${snapshot.isDragging ? 'rotate-1 scale-[1.02]' : ''}`}
+                                style={{ ...provided.draggableProps.style, filter: snapshot.isDragging ? 'drop-shadow(0 8px 20px rgba(0,0,0,0.12))' : undefined }}>
                                 <div className="relative group">
                                   <div {...provided.dragHandleProps}
                                     className="absolute -left-1 top-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-                                    style={{ color: '#aaaaaa' }}>
-                                    <GripVertical size={14} />
+                                    style={{ color: '#CBD5E1' }}>
+                                    <GripVertical size={13} />
                                   </div>
                                   <TaskCard task={t} onStatusChange={handleStatusChange} isAdmin={isAdmin}
                                     onDelete={isAdmin ? handleDeleteTask : undefined} />
@@ -285,16 +291,16 @@ export default function ProjectDetailPage() {
       </DragDropContext>
 
       {taskPages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-6">
+        <div className="flex items-center justify-center gap-2 mt-5">
           <button onClick={() => setTaskPage(p => Math.max(1, p - 1))} disabled={taskPage === 1}
-            className="flex items-center gap-1 px-4 py-2 text-sm font-black transition-all disabled:opacity-40"
-            style={{ background: '#ffffff', border: '2px solid #0a0a0a', color: '#0a0a0a', borderRadius: '50px', boxShadow: '2px 2px 0 #0a0a0a' }}>
+            className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-40 hover:opacity-80"
+            style={{ background: '#ffffff', border: '1px solid #E2E8F0', color: '#374151' }}>
             <ChevronLeft size={14} /> Prev
           </button>
-          <span className="text-sm font-bold" style={{ color: '#666666' }}>Page {taskPage} of {taskPages}</span>
+          <span className="text-xs px-2" style={{ color: '#94A3B8' }}>{taskPage} / {taskPages}</span>
           <button onClick={() => setTaskPage(p => Math.min(taskPages, p + 1))} disabled={taskPage === taskPages}
-            className="flex items-center gap-1 px-4 py-2 text-sm font-black transition-all disabled:opacity-40"
-            style={{ background: '#ffffff', border: '2px solid #0a0a0a', color: '#0a0a0a', borderRadius: '50px', boxShadow: '2px 2px 0 #0a0a0a' }}>
+            className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-40 hover:opacity-80"
+            style={{ background: '#ffffff', border: '1px solid #E2E8F0', color: '#374151' }}>
             Next <ChevronRight size={14} />
           </button>
         </div>

@@ -1,19 +1,19 @@
 import { Calendar, User, AlertCircle, Trash2, Paperclip } from 'lucide-react';
 import type { Task } from '../types';
 
-const priorityStyles: Record<string, React.CSSProperties> = {
-  high:   { background: '#FF3737', color: '#ffffff' },
-  medium: { background: '#FF8C00', color: '#ffffff' },
-  low:    { background: '#0a0a0a', color: '#ffffff' },
+const priorityBadge: Record<string, React.CSSProperties> = {
+  high:   { background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' },
+  medium: { background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A' },
+  low:    { background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0' },
 };
 
-const statusStyles: Record<string, React.CSSProperties> = {
-  'todo':        { background: '#ffffff', color: '#0a0a0a', border: '1.5px solid #0a0a0a' },
-  'in-progress': { background: '#1A3BFF', color: '#ffffff' },
-  'completed':   { background: '#C8FF00', color: '#0a0a0a' },
+const statusBadge: Record<string, React.CSSProperties> = {
+  'todo':        { background: '#F8FAFC', color: '#64748B', border: '1px solid #E2E8F0' },
+  'in-progress': { background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE' },
+  'completed':   { background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0' },
 };
 
-const statusLabels = { 'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Completed' };
+const statusLabels = { 'todo': 'To Do', 'in-progress': 'In Progress', 'completed': 'Done' };
 
 interface TaskCardProps {
   task: Task;
@@ -26,27 +26,27 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   return (
-    <div className="rounded-xl p-4 space-y-3 transition-all hover:-translate-y-0.5"
-      style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a' }}
-      onMouseEnter={e => (e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a')}
-      onMouseLeave={e => (e.currentTarget.style.boxShadow = '3px 3px 0 #0a0a0a')}
+    <div className="rounded-xl p-3.5 space-y-2.5 transition-all hover:-translate-y-px"
+      style={{ background: '#ffffff', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)')}
+      onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)')}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-bold text-sm leading-snug" style={{ color: '#0a0a0a' }}>{task.title}</h3>
-        <span className="text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 uppercase tracking-wide"
-          style={priorityStyles[task.priority]}>
+        <h3 className="font-semibold text-sm leading-snug" style={{ color: '#0F172A' }}>{task.title}</h3>
+        <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 capitalize"
+          style={priorityBadge[task.priority]}>
           {task.priority}
         </span>
       </div>
 
       {task.description && (
-        <p className="text-xs line-clamp-2" style={{ color: '#666666' }}>{task.description}</p>
+        <p className="text-xs line-clamp-2" style={{ color: '#94A3B8' }}>{task.description}</p>
       )}
 
       {task.attachmentUrl && (
         <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs font-semibold truncate transition-opacity hover:opacity-70"
-          style={{ color: '#1A3BFF' }}
+          className="flex items-center gap-1 text-xs font-medium truncate transition-opacity hover:opacity-70"
+          style={{ color: '#2563EB' }}
           onClick={e => e.stopPropagation()}>
           <Paperclip size={11} />
           <span className="truncate">Attachment</span>
@@ -57,22 +57,21 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
         {onStatusChange ? (
           <select value={task.status}
             onChange={e => onStatusChange(task._id, e.target.value as Task['status'])}
-            className="text-[10px] px-2.5 py-1 rounded-full font-black border-0 cursor-pointer outline-none uppercase tracking-wide"
-            style={statusStyles[task.status]}>
+            className="text-[10px] px-2 py-1 rounded-full font-semibold border-0 cursor-pointer outline-none"
+            style={statusBadge[task.status]}>
             <option value="todo">To Do</option>
             <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value="completed">Done</option>
           </select>
         ) : (
-          <span className="text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wide"
-            style={statusStyles[task.status]}>
+          <span className="text-[10px] px-2 py-1 rounded-full font-semibold" style={statusBadge[task.status]}>
             {statusLabels[task.status]}
           </span>
         )}
       </div>
 
-      <div className="flex items-center justify-between text-xs pt-1" style={{ borderTop: '1.5px solid #e0e0e0', color: '#666666' }}>
-        <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between text-xs pt-2" style={{ borderTop: '1px solid #F1F5F9', color: '#94A3B8' }}>
+        <div className="flex items-center gap-1.5">
           <User size={11} />
           <span>{task.assignedTo?.name ?? 'Unassigned'}</span>
         </div>
@@ -81,12 +80,12 @@ export default function TaskCard({ task, onStatusChange, isAdmin, onDelete }: Ta
             <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-500' : ''}`}>
               {isOverdue && <AlertCircle size={11} />}
               <Calendar size={11} />
-              <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+              <span>{new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
             </div>
           )}
           {isAdmin && onDelete && (
             <button onClick={() => onDelete(task._id)}
-              className="transition-colors hover:text-red-500" style={{ color: '#aaaaaa' }}>
+              className="transition-colors hover:text-red-500" style={{ color: '#CBD5E1' }}>
               <Trash2 size={12} />
             </button>
           )}

@@ -6,8 +6,12 @@ import api from '../lib/api';
 import type { Project } from '../types';
 import { CardSkeleton } from '../components/Skeleton';
 
-const PROJECT_COLORS = ['#1A3BFF', '#C8FF00', '#0a0a0a', '#1A3BFF', '#C8FF00', '#0a0a0a'];
-const PROJECT_TEXT   = ['#ffffff', '#0a0a0a', '#ffffff', '#ffffff', '#0a0a0a', '#ffffff'];
+const inputStyle: React.CSSProperties = {
+  background: '#ffffff',
+  border: '1px solid #D1D5DB',
+  borderRadius: '8px',
+  color: '#0F172A',
+};
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -37,7 +41,7 @@ export default function ProjectsPage() {
       setTotal(prev => prev + 1);
       setShowModal(false);
       setForm({ name: '', description: '' });
-      toast.success(`Project "${data.name}" created!`);
+      toast.success(`"${data.name}" created`);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to create project');
     } finally { setCreating(false); }
@@ -45,78 +49,80 @@ export default function ProjectsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-7">
-        <p className="text-sm font-bold" style={{ color: '#666666' }}>{total} project{total !== 1 ? 's' : ''}</p>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-sm font-medium" style={{ color: '#94A3B8' }}>{total} project{total !== 1 ? 's' : ''}</p>
         <button onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 font-black text-sm transition-all hover:scale-[1.03]"
-          style={{ background: '#C8FF00', color: '#0a0a0a', borderRadius: '50px', border: '2px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a' }}>
-          <Plus size={15} /> New Project
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all hover:opacity-90"
+          style={{ background: '#0F172A' }}>
+          <Plus size={14} /> New Project
         </button>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array(6).fill(0).map((_, i) => <CardSkeleton key={i} />)}
         </div>
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: '#C8FF00', border: '2px solid #0a0a0a' }}>
-            <FolderKanban style={{ color: '#0a0a0a' }} size={28} />
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: '#F1F5F9', border: '1px solid #E2E8F0' }}>
+            <FolderKanban size={24} style={{ color: '#CBD5E1' }} />
           </div>
-          <p className="font-black text-lg" style={{ color: '#0a0a0a' }}>No projects yet</p>
-          <p className="text-sm" style={{ color: '#666666' }}>Create your first project to get started</p>
+          <p className="font-semibold" style={{ color: '#0F172A' }}>No projects yet</p>
+          <p className="text-sm" style={{ color: '#94A3B8' }}>Create your first project to get started</p>
           <button onClick={() => setShowModal(true)}
-            className="mt-1 flex items-center gap-2 px-4 py-2 font-black text-sm"
-            style={{ background: '#C8FF00', color: '#0a0a0a', borderRadius: '50px', border: '2px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a' }}>
+            className="mt-1 flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all hover:opacity-90"
+            style={{ background: '#0F172A' }}>
             <Plus size={14} /> Create Project
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((p, i) => {
             const role = p.members.find(m => m.user)?.role ?? 'member';
-            const cardColor = PROJECT_COLORS[i % PROJECT_COLORS.length];
-            const cardText  = PROJECT_TEXT[i % PROJECT_TEXT.length];
+            const accentColors = ['#2563EB', '#7C3AED', '#0891B2', '#059669', '#D97706', '#DC2626'];
+            const accent = accentColors[i % accentColors.length];
             return (
               <Link key={p._id} to={`/projects/${p._id}`}
-                className="rounded-2xl overflow-hidden block group transition-all hover:-translate-y-1"
-                style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a' }}
-                onMouseEnter={e => (e.currentTarget.style.boxShadow = '6px 6px 0 #0a0a0a')}
-                onMouseLeave={e => (e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a')}>
-                <div className="h-24 p-5 relative overflow-hidden flex items-end" style={{ background: cardColor }}>
-                  <div className="absolute top-3 right-3 w-14 h-14 rounded-full" style={{ border: `1.5px solid ${cardText === '#ffffff' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}` }} />
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: cardText === '#ffffff' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }}>
-                    <FolderKanban size={18} style={{ color: cardText }} />
-                  </div>
-                </div>
+                className="rounded-xl overflow-hidden block group transition-all hover:-translate-y-px"
+                style={{ background: '#ffffff', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)')}
+                onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)')}>
+                {/* Thin accent top bar */}
+                <div className="h-1" style={{ background: accent }} />
                 <div className="p-5">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-black group-hover:opacity-70 transition-opacity" style={{ color: '#0a0a0a' }}>{p.name}</h3>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 uppercase tracking-wide"
+                  <div className="flex items-start justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: `${accent}15` }}>
+                        <FolderKanban size={15} style={{ color: accent }} />
+                      </div>
+                      <h3 className="font-semibold text-sm group-hover:text-blue-600 transition-colors" style={{ color: '#0F172A' }}>{p.name}</h3>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 capitalize"
                       style={role === 'admin'
-                        ? { background: '#C8FF00', color: '#0a0a0a', border: '1.5px solid #0a0a0a' }
-                        : { background: '#f0f0f0', color: '#666666', border: '1.5px solid #d0d0d0' }}>
+                        ? { background: '#FEF3C7', color: '#D97706', border: '1px solid #FDE68A' }
+                        : { background: '#F8FAFC', color: '#64748B', border: '1px solid #E2E8F0' }}>
                       {role}
                     </span>
                   </div>
                   {p.description
-                    ? <p className="text-sm line-clamp-2 mb-4" style={{ color: '#666666' }}>{p.description}</p>
-                    : <p className="text-sm italic mb-4" style={{ color: '#aaaaaa' }}>No description</p>
+                    ? <p className="text-xs line-clamp-2 mb-4" style={{ color: '#64748B' }}>{p.description}</p>
+                    : <p className="text-xs italic mb-4" style={{ color: '#CBD5E1' }}>No description</p>
                   }
-                  <div className="flex items-center justify-between text-xs pt-3" style={{ borderTop: '1.5px solid #e0e0e0', color: '#aaaaaa' }}>
+                  <div className="flex items-center justify-between text-xs" style={{ borderTop: '1px solid #F1F5F9', paddingTop: '12px', color: '#94A3B8' }}>
                     <div className="flex items-center gap-1.5">
                       <div className="flex -space-x-1.5">
                         {p.members.slice(0, 3).map(m => (
-                          <div key={m.user._id} className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black"
-                            style={{ background: '#1A3BFF', color: '#ffffff' }}>
+                          <div key={m.user._id} className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-semibold text-white"
+                            style={{ background: accent }}>
                             {m.user.name.charAt(0).toUpperCase()}
                           </div>
                         ))}
                       </div>
-                      <span className="font-medium">{p.members.length} member{p.members.length !== 1 ? 's' : ''}</span>
+                      <span>{p.members.length} member{p.members.length !== 1 ? 's' : ''}</span>
                     </div>
-                    <div className="flex items-center gap-1 font-medium">
-                      <Calendar size={11} /> {new Date(p.createdAt).toLocaleDateString()}
+                    <div className="flex items-center gap-1">
+                      <Calendar size={10} /> {new Date(p.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
@@ -128,16 +134,16 @@ export default function ProjectsPage() {
 
       {/* Pagination */}
       {pages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-8">
+        <div className="flex items-center justify-center gap-2 mt-8">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            className="px-4 py-2 text-sm font-black transition-all disabled:opacity-40"
-            style={{ background: '#ffffff', border: '2px solid #0a0a0a', color: '#0a0a0a', borderRadius: '50px', boxShadow: '2px 2px 0 #0a0a0a' }}>
+            className="px-4 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-40 hover:opacity-80"
+            style={{ background: '#ffffff', border: '1px solid #E2E8F0', color: '#374151' }}>
             ← Prev
           </button>
-          <span className="text-sm font-bold" style={{ color: '#666666' }}>Page {page} of {pages}</span>
+          <span className="text-sm px-3" style={{ color: '#94A3B8' }}>{page} / {pages}</span>
           <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages}
-            className="px-4 py-2 text-sm font-black transition-all disabled:opacity-40"
-            style={{ background: '#ffffff', border: '2px solid #0a0a0a', color: '#0a0a0a', borderRadius: '50px', boxShadow: '2px 2px 0 #0a0a0a' }}>
+            className="px-4 py-2 text-sm font-medium rounded-lg transition-all disabled:opacity-40 hover:opacity-80"
+            style={{ background: '#ffffff', border: '1px solid #E2E8F0', color: '#374151' }}>
             Next →
           </button>
         </div>
@@ -145,35 +151,35 @@ export default function ProjectsPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="w-full max-w-md rounded-2xl p-6" style={{ background: '#ffffff', border: '2px solid #0a0a0a', boxShadow: '6px 6px 0 #0a0a0a' }}>
-            <h2 className="text-lg font-black mb-1" style={{ color: '#0a0a0a' }}>New Project</h2>
-            <p className="text-sm mb-5" style={{ color: '#666666' }}>You'll be the admin of this project</p>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(15,23,42,0.5)' }}>
+          <div className="w-full max-w-md rounded-xl p-6" style={{ background: '#ffffff', border: '1px solid #E2E8F0', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+            <h2 className="text-base font-semibold mb-1" style={{ color: '#0F172A' }}>New Project</h2>
+            <p className="text-xs mb-5" style={{ color: '#94A3B8' }}>You'll be the admin of this project</p>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-xs font-black mb-1.5 uppercase tracking-wide" style={{ color: '#0a0a0a' }}>Name *</label>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>Name *</label>
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Mobile App Redesign"
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={{ background: '#f0f0f0', border: '2px solid #0a0a0a', color: '#0a0a0a' }} />
+                  className="w-full px-3 py-2.5 text-sm"
+                  style={inputStyle} />
               </div>
               <div>
-                <label className="block text-xs font-black mb-1.5 uppercase tracking-wide" style={{ color: '#0a0a0a' }}>Description</label>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#374151' }}>Description</label>
                 <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="What is this project about?" rows={3}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
-                  style={{ background: '#f0f0f0', border: '2px solid #0a0a0a', color: '#0a0a0a' }} />
+                  className="w-full px-3 py-2.5 text-sm resize-none"
+                  style={inputStyle} />
               </div>
-              <div className="flex gap-3 pt-1">
+              <div className="flex gap-2 pt-1">
                 <button type="button" onClick={() => { setShowModal(false); setForm({ name: '', description: '' }); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-black transition-colors"
-                  style={{ border: '2px solid #0a0a0a', color: '#0a0a0a', background: '#f0f0f0' }}>
+                  className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50"
+                  style={{ border: '1px solid #E2E8F0', color: '#374151' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={creating}
-                  className="flex-1 py-2.5 text-sm font-black disabled:opacity-60"
-                  style={{ background: '#C8FF00', color: '#0a0a0a', border: '2px solid #0a0a0a', borderRadius: '12px', boxShadow: '3px 3px 0 #0a0a0a' }}>
-                  {creating ? 'Creating…' : 'Create Project'}
+                  className="flex-1 py-2.5 text-sm font-medium text-white rounded-lg transition-all hover:opacity-90 disabled:opacity-60"
+                  style={{ background: '#0F172A' }}>
+                  {creating ? 'Creating…' : 'Create'}
                 </button>
               </div>
             </form>
